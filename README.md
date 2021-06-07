@@ -27,7 +27,7 @@ download the BDK FreeRTOS directly on [Download Center](http://bbs.bekencorp.com
 Here's a quick summary of resources to help you find your way around:
 
  - [Get Started](http://docs.bekencorp.com:8191/v3.0/get-started/index.html#get-started) - Getting Started Guides for BDK
- - [API reference](https://github.com/bekencorp/bdk_freertos/blob/release/v3.0/release/doc/BEKEN_WiFi_SDK_API_Reference-3.0.27.pdf) - Get API reference for BDK FreeRTOS
+ - [API reference](http://docs.bekencorp.com:8191/v3.0/api-reference/index.html) - Get API reference for BDK FreeRTOS
  - [Hardware Docs](http://bbs.bekencorp.com:8191/forum.php?mod=forumdisplay&fid=57) - Download all kinds of hardware documents
  - [Download Center](http://bbs.bekencorp.com:8191/forum.php?mod=forumdisplay&fid=57) - Download BDK ARM toolchains, BIN download tools and other resources
  - [Beken Products](http://www.bekencorp.com/index/goods/product.html) - Overview about different Beken products
