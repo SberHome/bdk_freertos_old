@@ -14,8 +14,7 @@ Here is the getting started guides:
  - step1, get the developing board from [Beken Products](http://www.bekencorp.com/index/goods/product.html).
  - step2, download the BDK FreeRTOS code on github [BDK FreeRTOS](https://github.com/bekencorp/bdk_freertos). For the non-github users,
 download the BDK FreeRTOS directly on [Download Center](http://bbs.bekencorp.com:8191/forum.php?mod=forumdisplay&fid=57).
- - step3, read the [User Manual](https://github.com/bekencorp/bdk_freertos/blob/release/v3.0/release/doc/BK72XX_SDK_User_Manual-3.0.3.pdf) to learn how to build,
-   download image and startup the board.
+ - step3, read the [Get Started](http://docs.bekencorp.com:8191/v3.0/get-started/index.html#get-started) to learn how to build, download BIN and startup the board.
  - step4, download the toolchain and BIN downloading tool from [Download Center](http://bbs.bekencorp.com:8191/forum.php?mod=forumdisplay&fid=57)
  - step5, seek support on [BBS](http://bbs.bekencorp.com:8191/forum.php), or report bugs on [Github Issue Forum](https://github.com/bekencorp/bdk_freertos/issues)
 
