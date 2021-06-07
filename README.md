@@ -5,11 +5,7 @@ Welcome to BDK FreeRTOS!
 The BDK FreeRTOS integrates Beken Software Development Kit and the FreeRTOS, which is aimed for the resource-constrained
 and low-cost applications, such as the IoT applications.
 
-The BDK FreeRTOS supports multiple Beken chips, including:
-
- - [BK7231N-TODO-link](http://www.bekencorp.com/)
- - [BK7251-TODO-link](http://www.bekencorp.com/)
- - [BK7231U-TODO-link](http://www.bekencorp.com/).
+The BDK FreeRTOS supports multiple Beken chips, including [BK7231N](http://docs.bekencorp.com:8191/v3.0/get-started/demo_board.html#bk7231n), [BK7251](http://docs.bekencorp.com:8191/v3.0/get-started/demo_board.html#bk7251) and [BK7231U](http://docs.bekencorp.com:8191/v3.0/get-started/demo_board.html#bk7231u).
 
 # Getting Started
 
@@ -31,7 +27,7 @@ download the BDK FreeRTOS directly on [Download Center](http://bbs.bekencorp.com
 
 Here's a quick summary of resources to help you find your way around:
 
- - [User Manual](https://github.com/bekencorp/bdk_freertos/blob/release/v3.0/release/doc/BK72XX_SDK_User_Manual-3.0.3.pdf) - Getting Started Guides for BDK FreeRTOS
+ - [Get Started](http://docs.bekencorp.com:8191/v3.0/get-started/index.html#get-started) - Getting Started Guides for BDK
  - [API reference](https://github.com/bekencorp/bdk_freertos/blob/release/v3.0/release/doc/BEKEN_WiFi_SDK_API_Reference-3.0.27.pdf) - Get API reference for BDK FreeRTOS
  - [Hardware Docs](http://bbs.bekencorp.com:8191/forum.php?mod=forumdisplay&fid=57) - Download all kinds of hardware documents
  - [Download Center](http://bbs.bekencorp.com:8191/forum.php?mod=forumdisplay&fid=57) - Download BDK ARM toolchains, BIN download tools and other resources
