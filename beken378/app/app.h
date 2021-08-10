@@ -12,7 +12,7 @@
 #define APP_PRT       os_printf
 #define APP_WPRT      warning_prf
 #else
-#define APP_PRT       os_null_printf
+#define APP_PRT       os_printf
 #define APP_WPRT      warning_prf
 #endif
 
