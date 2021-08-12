@@ -135,6 +135,10 @@ int paho_mqtt_start(MQTT_CLIENT_T *client);
  */
 int mqtt_publish(MQTT_CLIENT_T *client, const char *topic, MQTTMessage *message);
 
+
+
+int mqtt_publish_with_topic(MQTT_CLIENT_T *c, const char *topicName, MQTTMessage *message);
+
 #ifdef PAHOMQTT_PIPE_MODE
 
 /**

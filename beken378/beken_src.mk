@@ -1,4 +1,3 @@
-
 BEKEN_DIR ?= .
 
 WPA_VERSION := wpa_supplicant_2_9
@@ -225,7 +224,7 @@ endif
 endif
 
 #usb module
-#ifeq ($(CFG_USB),1)
+ifeq ($(CFG_USB),1)
 INCLUDES += -I$(BEKEN_DIR)/beken378/driver/usb/include
 INCLUDES += -I$(BEKEN_DIR)/beken378/driver/usb/include/class
 INCLUDES += -I$(BEKEN_DIR)/beken378/driver/usb/src/cd
@@ -243,7 +242,7 @@ INCLUDES += -I$(BEKEN_DIR)/beken378/driver/usb/src/msc
 INCLUDES += -I$(BEKEN_DIR)/beken378/driver/usb/src/systems/none/afs
 INCLUDES += -I$(BEKEN_DIR)/beken378/driver/usb/src/systems/none
 INCLUDES += -I$(BEKEN_DIR)/beken378/driver/usb/src/uvc
-#endif
+endif
 
 ifeq ("${CFG_MBEDTLS}", "1")
 #CFG_DEFINE_INCLUDE += MBEDTLS_CONFIG_FILE=\"tls_config.h\"
@@ -280,7 +279,7 @@ SRC_C += $(BEKEN_DIR)/beken378/app/net_work/video_demo_station.c
 SRC_C += $(BEKEN_DIR)/beken378/app/net_work/video_demo_softap.c
 
 #demo module
-SRC_C += $(BEKEN_DIR)/beken378/demo/ieee802_11_demo.c
+#SRC_C += $(BEKEN_DIR)/beken378/demo/ieee802_11_demo.c
 
 #driver layer
 SRC_C += $(BEKEN_DIR)/beken378/driver/common/dd.c
@@ -340,7 +339,7 @@ ifeq ($(CFG_BK_AWARE),1)
 SRC_C += $(BEKEN_DIR)/beken378/func/bk_aware/bk_aware.c
 endif
 
-SRC_C += $(BEKEN_DIR)/beken378/func/hostapd_intf/hostapd_intf.c
+#SRC_C += $(BEKEN_DIR)/beken378/func/hostapd_intf/hostapd_intf.c
 ifeq ($(CFG_USE_SDCARD_HOST),1)
 SRC_C += $(BEKEN_DIR)/beken378/func/fatfs/cc936.c
 SRC_C += $(BEKEN_DIR)/beken378/func/fatfs/ccsbcs.c
@@ -473,7 +472,7 @@ SRC_C += $(BEKEN_DIR)/beken378/driver/spi/spi_master.c
 SRC_C += $(BEKEN_DIR)/beken378/driver/spi/spi_slave.c
 endif
 
-# For BK7$(BEKEN_DIR)31N
+# For BK731N
 ifeq ($(CFG_SOC_NAME), 5)
 SRC_C += $(BEKEN_DIR)/beken378/driver/spi/spi_bk7231n.c
 SRC_C += $(BEKEN_DIR)/beken378/driver/spi/spi_master_bk7231n.c
@@ -487,7 +486,7 @@ SRC_C += $(BEKEN_DIR)/beken378/func/airkiss/bk_airkiss.c
 SRC_C += $(BEKEN_DIR)/beken378/func/airkiss/airkiss_main.c
 SRC_C += $(BEKEN_DIR)/beken378/func/airkiss/airkiss_pingpong.c
 
-#easy fla$(BEKEN_DIR)h
+#easy flash
 SRC_C += $(BEKEN_DIR)/beken378/func/easy_flash/bk_ef.c
 SRC_C += $(BEKEN_DIR)/beken378/func/easy_flash/src/easyflash.c
 SRC_C += $(BEKEN_DIR)/beken378/func/easy_flash/src/ef_env.c

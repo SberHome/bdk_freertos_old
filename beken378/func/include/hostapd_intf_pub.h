@@ -1,6 +1,9 @@
 #ifndef _HOSTAPD_INTF_PUB_H_
 #define _HOSTAPD_INTF_PUB_H_
 
+#include "common.h"
+#include "driver_beken.h"
+
 extern int hapd_intf_ioctl(unsigned long arg);
 extern void hapd_intf_ke_rx_handle(INT32 dummy);
 extern int hapd_intf_set_ap(void *beacon, int bcn_len, int head_len);
@@ -11,7 +14,6 @@ extern void wpa_enable_traffic_port_at_opensystem(void);
 
 typedef void (*bk_ap_no_password_cb_t)(void);
 void bk_ap_no_password_connected_register_cb(bk_ap_no_password_cb_t func);
-
 #endif
 // eof
 

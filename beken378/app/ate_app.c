@@ -2,6 +2,7 @@
 #if ATE_APP_FUN
 
 #include "include.h"
+#include "sys_config.h"
 
 #if (CFG_OS_FREERTOS)
 #include "app.h"

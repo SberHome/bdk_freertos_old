@@ -106,10 +106,11 @@ void entry_main(void)
        			  
        			  if you do not care the boot time, the function: extended_app_launch shall be invoked 
        			  BEFORE user_main_entry;*/
-	user_main_entry();	
+	
 	
     /* step 3: init of the most of devices*/
 	extended_app_launch();
+	user_main_entry();	
 	
 #if (CFG_OS_FREERTOS)
     vTaskStartScheduler();

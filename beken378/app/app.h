@@ -12,7 +12,7 @@
 #define APP_PRT       os_printf
 #define APP_WPRT      warning_prf
 #else
-#define APP_PRT       os_printf
+#define APP_PRT       null_prf
 #define APP_WPRT      warning_prf
 #endif
 
@@ -70,6 +70,7 @@ void app_pre_start(void);
 int bmsg_is_empty(void);
 void core_thread_uninit(void);
 int bmsg_tx_raw_cb_sender(uint8_t *buffer, int length, void *cb, void *param);
+void bmsg_null_sender(void);
 
 #endif // _APP_H_
 // eof

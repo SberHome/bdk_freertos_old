@@ -20,6 +20,9 @@
 #include "mcu_ps_pub.h"
 #include "error.h"
 #include "start_type_pub.h"
+#include "app.h"
+
+
 
 #if CFG_SUPPORT_BLE
 #include "ble_pub.h"
@@ -71,7 +74,6 @@ static beken2_timer_t ps_wait_timer = {0};
 #if PS_USE_KEEP_TIMER
 void power_save_keep_timer_handler ( void *data );
 #endif
-extern void bmsg_null_sender ( void );
 
 int net_if_is_up ( void )
 {
@@ -957,7 +959,6 @@ void power_save_keep_timer_real_handler(void)
 		delay ( 1 );
 		PS_DEBUG_PWM_TRIGER;
 #if CFG_USE_STA_PS
-		extern void bmsg_null_sender ( void );
 		bmsg_null_sender();
 #endif
 	}
