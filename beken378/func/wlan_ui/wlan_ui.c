@@ -1268,7 +1268,7 @@ int bk_wlan_stop_scan(void)
     return ret;
 }
 
-int bk_wlan_stop(char mode)
+int bk_wlan_stop(wlanInterfaceTypedef mode)
 {
     int ret = kNoErr;
     UINT32 reg;

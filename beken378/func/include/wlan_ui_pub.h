@@ -397,7 +397,7 @@ int bk_wlan_is_monitor_mode(void);
 uint32_t bk_sta_cipher_is_open(void);
 uint32_t bk_sta_cipher_is_wep(void);
 int bk_sta_cipher_type(void);
-int bk_wlan_stop(char mode);
+int bk_wlan_stop(wlanInterfaceTypedef mode);
 void bk_wlan_ap_set_channel_config(uint8_t channel);
 uint8_t bk_wlan_ap_get_channel_config(void);
 uint32_t bk_wlan_ap_get_frequency(void);
