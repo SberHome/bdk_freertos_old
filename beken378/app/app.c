@@ -638,8 +638,11 @@ static void core_thread_main( void *arg )
 				bmsg_rx_lsig_handler(&msg);
 				break;
 #endif
+            case BMSG_NULL_TYPE:
+                break;
+
             default:
-                APP_PRT("unknown_msg\r\n");
+                APP_PRT("unknown_msg type %d\r\n", msg.type);
                 break;
             }
 
