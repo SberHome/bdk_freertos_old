@@ -256,16 +256,13 @@ static void wpas_thread_main( void *arg )
 #ifdef CONFIG_WPA_PSK_CACHE
 	wpa_psk_cache_init();
 #endif
-
     eloop_init();
 
     eloop_run();
 
 	wpas_thread_handle = NULL;
-
     rtos_deinit_queue(&wpah_queue);
     wpah_queue = NULL;
-
 	rtos_delete_thread(NULL);
 }
 

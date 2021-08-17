@@ -768,7 +768,8 @@ void app_pre_start(void)
 
     core_thread_init();
 
-    rf_thread_init();
+#warning Don't know if this is really needed. Tuya doesn't call it
+//    rf_thread_init();
 
 #if (CONFIG_APP_MP3PLAYER == 1)
     key_init();
@@ -787,7 +788,8 @@ void app_start(void)
     app_pre_start();
 
 #if (CFG_OS_FREERTOS)
-    cli_init();
+#warning Don't know if it really needed. Tuya doesn't have it
+//    cli_init();
 #endif
 
 #if CFG_UDISK_MP3
