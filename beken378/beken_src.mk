@@ -279,7 +279,7 @@ SRC_C += $(BEKEN_DIR)/beken378/app/net_work/video_demo_station.c
 SRC_C += $(BEKEN_DIR)/beken378/app/net_work/video_demo_softap.c
 
 #demo module
-#SRC_C += $(BEKEN_DIR)/beken378/demo/ieee802_11_demo.c
+SRC_C += $(BEKEN_DIR)/beken378/demo/ieee802_11_demo.c
 
 #driver layer
 SRC_C += $(BEKEN_DIR)/beken378/driver/common/dd.c
