@@ -62,7 +62,7 @@
 #define SARADC_ADC_SAT_OVERFLOW         (0x01UL << 3)
 
 #define SARADC_ADC_DAT_AFTER_STA        (SARADC_BASE + 4 * 4)
-#elif (CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236)
+#elif (CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236)
 #define SARADC_BASE                     (0x00802C00)
 #define SARADC_ADC_CONFIG               (SARADC_BASE + 0 * 4)
 #define SARADC_ADC_MODE_POSI            (0)

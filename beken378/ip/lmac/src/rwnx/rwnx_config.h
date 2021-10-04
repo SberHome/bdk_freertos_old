@@ -40,7 +40,11 @@
 #if CFG_LESS_MEMERY_IN_RWNX
 #define CFG_AMSDU_2K
 #else
+#if CFG_IPERF_TEST_ACCEL
+#define CFG_AMSDU_8K
+#else
 #define CFG_AMSDU_4K
+#endif
 #endif
 
 #define CFG_STA_MAX       2
@@ -50,7 +54,11 @@
 #define CFG_TXDESC1       1
 
 #if !CFG_LESS_MEMERY_IN_RWNX
+#if CFG_IPERF_TEST_ACCEL
+#define CFG_TXDESC2       32
+#else
 #define CFG_TXDESC2       32 
+#endif /*end CFG_IPERF_TEST_ACCEL*/
 #else
 #define CFG_TXDESC2       16 
 #endif
@@ -414,12 +422,6 @@
 /// Maximum size of a beacon frame
 #define NX_BCNFRAME_LEN      512
 
-/// Number of RX descriptors (SW and Header descriptors)
-#if !CFG_LESS_MEMERY_IN_RWNX
-#define NX_RXDESC_CNT        17
-#else
-#define NX_RXDESC_CNT        9
-#endif
 
 /// RX Payload buffer size
 #define NX_RX_PAYLOAD_LEN    512
@@ -431,6 +433,12 @@
 /// plus one extra one used for HW flow control
 #define NX_RX_PAYLOAD_DESC_CNT ((RWNX_MAX_AMSDU_RX / NX_RX_PAYLOAD_LEN) * 2 + 1)
 
+/// Number of RX descriptors (SW and Header descriptors)
+#if !CFG_LESS_MEMERY_IN_RWNX
+#define NX_RXDESC_CNT       NX_RX_PAYLOAD_DESC_CNT // 17
+#else
+#define NX_RXDESC_CNT        9
+#endif
 /// Number of payloads per TX descriptor
 #if NX_AMSDU_TX
 #define NX_TX_PAYLOAD_MAX           6

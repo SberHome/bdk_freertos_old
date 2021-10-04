@@ -63,7 +63,7 @@ help:
 	@echo "clean           clean project"
 	@echo "bk7231          build bk7231 default project"
 	@echo "bk7231u         build bk7231u default project"
-	@echo "bk7231n         build bk7231n default project"
+	@echo "bl2028n         build bl2028n default project"
 	@echo "bk7251          build bk7251 default project"
 	@echo "bk7271          build bk7271 default project"
 

@@ -12,6 +12,9 @@
 #include "gpio.h"
 #include "fake_clock_pub.h"
 #include "icu.h"
+#include "force_mcu_ps.h"
+#include "str_pub.h"
+
 #if PS_SUPPORT_MANUAL_SLEEP
 
 #include "BkDriverGpio.h"
@@ -540,3 +543,46 @@ void bk_enter_deep_sleep_mode ( PS_DEEP_CTRL_PARAM *deep_param )
 	GLOBAL_INT_RESTORE();
 }
 #endif
+
+#if (1 == CFG_USE_FORCE_LOWVOL_PS)
+
+UINT32 bk_wlan_instant_normal_sleep(UINT32 sleep_ms)
+{
+	return force_mcu_ps(1024 * sleep_ms, 0);
+}
+
+UINT32 bk_wlan_instant_lowvol_sleep( PS_DEEP_CTRL_PARAM *lowvol_param )
+{
+	return bk_force_instant_lowvol_sleep(lowvol_param);
+}
+
+void lowvol_Sleep_Command(char *pcWriteBuffer, int xWriteBufferLen, int argc, char **argv)
+{
+	PS_DEEP_CTRL_PARAM deep_sleep_param;
+
+	deep_sleep_param.gpio_index_map = os_strtoul(argv[1], NULL, 16);
+	deep_sleep_param.gpio_edge_map = os_strtoul(argv[2], NULL, 16);
+	deep_sleep_param.gpio_last_index_map = 0;
+	deep_sleep_param.gpio_last_edge_map = 0;
+	deep_sleep_param.sleep_time = os_strtoul(argv[3], NULL, 16);
+	deep_sleep_param.wake_up_way = os_strtoul(argv[4], NULL, 16);
+
+	if(argc == 5)
+	{
+		os_printf("---lowvol sleep test param : 0x%0X 0x%0X %d s  %d\r\n",
+					deep_sleep_param.gpio_index_map,
+					deep_sleep_param.gpio_edge_map,
+					deep_sleep_param.sleep_time,
+					deep_sleep_param.wake_up_way);
+
+		bk_wlan_instant_lowvol_sleep(&deep_sleep_param);
+
+		os_printf("wake by %d\r\n",bk_misc_wakeup_get_gpio_num());
+	}
+	else
+	{
+		os_printf("---argc error!!! \r\n");
+	}
+}
+#endif
+

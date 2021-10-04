@@ -56,7 +56,7 @@ UINT32 func_init_extended(void)
     // load mac, init mac first
     wifi_get_mac_address(temp_mac, CONFIG_ROLE_NULL);
 	
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     manual_cal_load_bandgap_calm();
 #endif
     FUNC_PRT("[FUNC]rwnxl_init\r\n");

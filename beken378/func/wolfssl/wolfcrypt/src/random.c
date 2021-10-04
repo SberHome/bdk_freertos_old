@@ -687,7 +687,7 @@ static int _InitRng(WC_RNG* rng, byte* nonce, word32 nonceSz,
                     void* heap, int devId)
 {
     int ret = RNG_FAILURE_E;
-#ifdef HAVE_HASHDRBG
+#if !defined(CUSTOM_RAND_GENERATE_BLOCK) && defined(HAVE_HASHDRBG)
     word32 seedSz = SEED_SZ + SEED_BLOCK_SZ;
 #endif
 
@@ -1108,7 +1108,7 @@ const byte outputB[] = {
 };
 
 
-static int wc_RNG_HealthTestLocal(int reseed)
+__maybe_unused static int wc_RNG_HealthTestLocal(int reseed)
 {
     int ret = 0;
 #ifdef WOLFSSL_SMALL_STACK
@@ -2170,6 +2170,7 @@ int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
     }
 
 #elif defined(WOLFSSL_BEKEN)
+#include "utils/os.h"
         int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
         {
             word32 rand;

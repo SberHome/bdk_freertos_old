@@ -50,9 +50,7 @@
 #define CFG_USE_WPA_29                             1
 #undef CFG_IEEE80211W
 #define CFG_IEEE80211W                             1
-#define CFG_SME                                    0
 #endif
-//#define CFG_MESH                                 0
 #define CFG_WFA_CERT                               0
 #define CFG_ENABLE_BUTTON                          0
 #define CFG_UDISK_MP3                              0
@@ -111,7 +109,7 @@
 #define SOC_BK7231                                 1
 #define SOC_BK7231U                                2
 #define SOC_BK7221U                                3
-#define SOC_BK7231N                                5
+#define SOC_BL2028N                                5
 #define CFG_SOC_NAME                               SOC_BK7231
 
 /*section 7-----calibration*/
@@ -214,9 +212,12 @@
 
 #define CFG_XTAL_FREQUENCE_40M                     40000000 //40MHz
 #define CFG_XTAL_FREQUENCE_26M                     26000000 //26MHz
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 #define CFG_XTAL_FREQUENCE                         CFG_XTAL_FREQUENCE_26M//CFG_XTAL_FREQUENCE_40M
 #else
 #define CFG_XTAL_FREQUENCE                         CFG_XTAL_FREQUENCE_26M
 #endif
+
+#define CFG_USE_FORCE_LOWVOL_PS                    0
+
 #endif // _SYS_CONFIG_H_

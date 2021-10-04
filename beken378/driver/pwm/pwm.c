@@ -1,7 +1,7 @@
 #include "include.h"
 #include "arm_arch.h"
 
-#if (CFG_SOC_NAME != SOC_BK7231N)
+#if (CFG_SOC_NAME != SOC_BL2028N)
 #include "pwm.h"
 #include "pwm_pub.h"
 

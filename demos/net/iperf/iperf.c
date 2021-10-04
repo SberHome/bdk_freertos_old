@@ -13,13 +13,19 @@
 #define THREAD_SIZE             (4 * 1024)
 #define THREAD_PROIRITY         4
 #define IPERF_PORT              5001
+#if CFG_IPERF_TEST_ACCEL
+#define IPERF_BUFSZ             (16 * 1460)
+#else
 #define IPERF_BUFSZ             (4 * 1024)
+#endif
+#define IPERF_BUFSZ_UDP         (4 * 1024)
 #define IPERF_TX_TIMEOUT_SEC    (3)
 #define IPERF_RX_TIMEOUT_SEC    (3)
 #define IPERF_MAX_TX_RETRY      10
 #define IPERF_MAX_RX_RETRY      10
 #define IPERF_REPORT_INTERVAL   3
 #define IPERF_INVALID_INDEX     (-1)
+#define IPERF_DEFAULT_DURATION  30 /*second*/
 
 enum {
 	IPERF_STATE_STOPPED = 0,
@@ -41,9 +47,18 @@ typedef struct {
 	int mode;
 	char *host;
 	int port;
+	uint32_t duration;
 } iperf_param_t;
 
+#if CFG_IPERF_DONT_MALLOC_BUFFER
+extern uint8_t _empty_ram;
+#endif
+#if CFG_IPERF_TEST_ACCEL
+extern void sctrl_overclock(int improve);
+#endif
+
 static iperf_param_t s_param = { IPERF_STATE_STOPPED, IPERF_MODE_NONE, NULL, IPERF_PORT};
+
 
 static void iperf_reset(void)
 {
@@ -107,18 +122,27 @@ static void iperf_report(uint32_t pkt_len)
 
 static void iperf_client(void *thread_param)
 {
-	int i, sock, ret;
+	int sock, ret;
+#if !defined(CFG_IPERF_DONT_MALLOC_BUFFER) || (CFG_IPERF_DONT_MALLOC_BUFFER==0)
+	int i;
+#endif
 	uint8_t *send_buf;
 	struct sockaddr_in addr;
-	uint32_t retry_cnt = 0;
+	uint32_t start_tick, retry_cnt = 0;
 
+#if CFG_IPERF_DONT_MALLOC_BUFFER
+	send_buf = &_empty_ram;
+#else
 	send_buf = (uint8_t *) os_malloc(IPERF_BUFSZ);
 	if (!send_buf)
 		goto _exit;
 
 	for (i = 0; i < IPERF_BUFSZ; i++)
 		send_buf[i] = i & 0xff;
-
+#endif
+#if CFG_IPERF_TEST_ACCEL
+	sctrl_overclock(1);
+#endif
 	while (s_param.state == IPERF_STATE_STARTED) {
 		sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 		if (sock < 0) {
@@ -139,9 +163,10 @@ static void iperf_client(void *thread_param)
 			continue;
 		}
 
-		os_printf("iperf: connect to iperf server successful!\n");
+		os_printf("iperf: connect to server successful!\n");
 		iperf_set_sock_opt(sock);
 		iperf_report_init();
+		start_tick = fclk_get_tick();
 
 		while (s_param.state == IPERF_STATE_STARTED) {
 			retry_cnt = 0;
@@ -164,6 +189,10 @@ _tx_retry:
 
 				break;
 			}
+			if ((s_param.duration > 0) && (fclk_get_tick() - start_tick) >= s_param.duration) {
+			    s_param.state = IPERF_STATE_STOPPED;
+			    break;
+			}
 		}
 
 		closesocket(sock);
@@ -172,11 +201,16 @@ _tx_retry:
 		rtos_delay_milliseconds(1000 * 2);
 	}
 
+#if CFG_IPERF_TEST_ACCEL
+	sctrl_overclock(0);
+#endif
+#if !defined(CFG_IPERF_DONT_MALLOC_BUFFER) || (CFG_IPERF_DONT_MALLOC_BUFFER==0)
 _exit:
 	if (send_buf)
 		os_free(send_buf);
+#endif
 	iperf_reset();
-	os_printf("iperf: is stopped\n");
+	os_printf("iperf: stopped\n");
 	rtos_delete_thread(NULL);
 }
 
@@ -216,6 +250,9 @@ void iperf_server(void *thread_param)
 	}
 	iperf_set_sock_opt(sock);
 
+#if CFG_IPERF_TEST_ACCEL
+	sctrl_overclock(1);
+#endif
 	while (s_param.state == IPERF_STATE_STARTED) {
 		sin_size = sizeof(struct sockaddr_in);
 _accept_retry:
@@ -261,6 +298,9 @@ _rx_retry:
 		connected = -1;
 	}
 
+#if CFG_IPERF_TEST_ACCEL
+	sctrl_overclock(0);
+#endif
 __exit:
 	if (sock >= 0)
 		closesocket(sock);
@@ -271,25 +311,29 @@ __exit:
 	}
 
 	iperf_reset();
-	os_printf("iperf: iperf is stopped\n");
+	os_printf("iperf: stopped\n");
 	rtos_delete_thread(NULL);
 }
 
 static void iperf_udp_client(void *thread_param)
 {
 	int sock, ret;
-	uint32_t *buffer;
+	uint8_t *buffer;
 	struct sockaddr_in server;
-	uint32_t tick, packet_count = 0;
-	uint32_t retry_cnt;
+	uint32_t tick, packet_count = 0, start_tick;
+	uint32_t retry_cnt, *iperf_hdr = NULL;
 	int send_size;
 
 	send_size = IPERF_BUFSZ > 1470 ? 1470 : IPERF_BUFSZ;
-	buffer = os_malloc(IPERF_BUFSZ);
+	buffer = os_malloc(send_size);
 	if (buffer == NULL)
 		goto udp_exit;
-	os_memset(buffer, 0x00, IPERF_BUFSZ);
+	os_memset(buffer, 0x00, send_size);
+	iperf_hdr = (uint32_t*)buffer;
 
+#if CFG_IPERF_TEST_ACCEL
+	sctrl_overclock(1);
+#endif
 	while (IPERF_STATE_STARTED == s_param.state) {
 		sock = socket(PF_INET, SOCK_DGRAM, 0);
 		if (sock < 0) {
@@ -301,21 +345,22 @@ static void iperf_udp_client(void *thread_param)
 		server.sin_family = PF_INET;
 		server.sin_port = htons(s_param.port);
 		server.sin_addr.s_addr = inet_addr(s_param.host);
+		iperf_report_init();
+		start_tick = fclk_get_tick();
 		os_printf("iperf udp mode run...\n");
 
 		while (IPERF_STATE_STARTED == s_param.state) {
-			packet_count ++;
+			packet_count++;
 			retry_cnt = 0;
-
 			tick = fclk_get_tick();
-			buffer[0] = htonl(packet_count);
-			buffer[1] = htonl(tick / TICK_PER_SECOND);
-			buffer[2] = htonl((tick % TICK_PER_SECOND) * 1000);
-
+			iperf_hdr[0] = htonl(packet_count);
+			iperf_hdr[1] = htonl(tick / TICK_PER_SECOND);
+			iperf_hdr[2] = htonl((tick % TICK_PER_SECOND) * 1000);
 tx_retry:
 			ret = sendto(sock, buffer, send_size, 0, (struct sockaddr *)&server, sizeof(struct sockaddr_in));
-			if (ret)
+			if (ret) {
 				iperf_report(ret);
+			}
 			else {
 				retry_cnt ++;
 
@@ -327,6 +372,10 @@ tx_retry:
 
 				goto tx_retry;
 			}
+			if ((s_param.duration > 0) && (tick - start_tick) >= s_param.duration) {
+			    s_param.state = IPERF_STATE_STOPPED;
+			    break;
+			}
 		}
 
 		closesocket(sock);
@@ -336,13 +385,18 @@ tx_retry:
 		rtos_delay_milliseconds(1000 * 2);
 	}
 
+#if CFG_IPERF_TEST_ACCEL
+	sctrl_overclock(0);
+#endif
+
 udp_exit:
 	if (buffer) {
 		os_free(buffer);
 		buffer = NULL;
 	}
-	iperf_reset();
 
+	iperf_reset();
+	os_printf("iperf: stopped\n");
 	rtos_delete_thread(NULL);
 }
 
@@ -358,7 +412,7 @@ static void iperf_udp_server(void *thread_param)
 	uint64_t tick1, tick2;
 	struct timeval timeout;
 
-	buffer = os_malloc(IPERF_BUFSZ);
+	buffer = os_malloc(IPERF_BUFSZ_UDP);
 	if (buffer == NULL)
 		return;
 	sock = socket(PF_INET, SOCK_DGRAM, 0);
@@ -382,7 +436,11 @@ static void iperf_udp_server(void *thread_param)
 		goto userver_exit;
 	}
 
-	while (s_param.mode == IPERF_STATE_STARTED) {
+#if CFG_IPERF_TEST_ACCEL
+	sctrl_overclock(1);
+#endif
+	iperf_report_init();
+	while (s_param.state == IPERF_STATE_STARTED) {
 		tick1 = fclk_get_tick();
 		tick2 = tick1;
 
@@ -390,7 +448,7 @@ static void iperf_udp_server(void *thread_param)
 		total = 0;
 
 		while ((tick2 - tick1) < (TICK_PER_SECOND * 5)) {
-			r_size = recvfrom(sock, buffer, IPERF_BUFSZ, 0, (struct sockaddr *)&sender, (socklen_t *)&sender_len);
+			r_size = recvfrom(sock, buffer, IPERF_BUFSZ_UDP, 0, (struct sockaddr *)&sender, (socklen_t *)&sender_len);
 			if (r_size > 12) {
 				pcount = ntohl(buffer[0]);
 				if (last_pcount < pcount) {
@@ -406,6 +464,9 @@ static void iperf_udp_server(void *thread_param)
 		}
 	}
 
+#if CFG_IPERF_TEST_ACCEL
+	sctrl_overclock(0);
+#endif
 userver_exit:
 	if (sock >= 0)
 		closesocket(sock);
@@ -416,6 +477,7 @@ userver_exit:
 	}
 
 	iperf_reset();
+	os_printf("iperf: stopped\n");
 	rtos_delete_thread(NULL);
 }
 
@@ -467,6 +529,7 @@ void iperf_usage(void)
 	os_printf("\n");
 	os_printf("Miscellaneous:\n");
 	os_printf("  -u           udp support, and the default mode is tcp\n");
+	os_printf("  -t           time in seconds to transmit for (default 30 secs)\n");
 	os_printf("  -h           print this message and quit\n");
 	os_printf("  --stop       stop iperf program\n");
 
@@ -481,12 +544,13 @@ static void iperf_stop(void)
 	}
 }
 
-static void iperf_start(int mode, char *host, int port)
+static void iperf_start(int mode, char *host, int port, uint32_t duration)
 {
 	if (s_param.state == IPERF_STATE_STOPPED) {
 		s_param.state = IPERF_STATE_STARTED;
 		s_param.mode = mode;
 		s_param.port = port;
+		s_param.duration = duration * TICK_PER_SECOND;
 		if (s_param.host) {
 			os_free(s_param.host);
 			s_param.host = NULL;
@@ -526,6 +590,7 @@ void iperf(char *pcWriteBuffer, int xWriteBufferLen, int argc, char **argv)
 	int is_udp_flag = 0;
 	int port = IPERF_PORT;
 	int is_server_mode, is_client_mode;
+	uint32_t duration = IPERF_DEFAULT_DURATION;
 
 	/* check parameters of command line*/
 	if (iperf_param_find(argc, argv, "-h") || (argc == 1))
@@ -576,9 +641,12 @@ void iperf(char *pcWriteBuffer, int xWriteBufferLen, int argc, char **argv)
 			if ((IPADDR_NONE == addr) || (argc - 1 < id + 1))
 				goto __usage;
 		}
+		id = iperf_param_find_id(argc, argv, "-t");
+		if (IPERF_INVALID_INDEX != id)
+			duration = atoi(argv[id + 1]);
 	}
 
-	iperf_start(mode, host, port);
+	iperf_start(mode, host, port, duration);
 
 	return;
 

@@ -61,7 +61,7 @@
 #include "security_pub.h"
 #endif
 
-#if (SOC_BK7231N == CFG_SOC_NAME)
+#if (SOC_BL2028N == CFG_SOC_NAME)
 #include "calendar_pub.h"
 #endif
 
@@ -73,7 +73,7 @@ static DD_INIT_S dd_init_tbl[] =
     {WDT_DEV_NAME,          wdt_init,                   wdt_exit},
     {GPIO_DEV_NAME,         gpio_init,                  gpio_exit},
 
-#if (SOC_BK7231N == CFG_SOC_NAME)
+#if (SOC_BL2028N == CFG_SOC_NAME)
 	{CAL_DEV_NAME,			cal_init,					cal_exit},
 #endif
     

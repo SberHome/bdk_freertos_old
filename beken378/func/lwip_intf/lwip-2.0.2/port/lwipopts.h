@@ -207,7 +207,11 @@
 #if ((defined(CFG_LWIP_MEM_POLICY))&&(CFG_LWIP_MEM_POLICY == LWIP_REDUCE_THE_PLAN))
 #define PBUF_POOL_SIZE                  3
 #else
+#if CFG_IPERF_TEST_ACCEL
+#define PBUF_POOL_SIZE                  16
+#else
 #define PBUF_POOL_SIZE                  10
+#endif
 #endif
 
 /*
@@ -407,6 +411,7 @@ The STM32F107 allows computing and verifying the IP, UDP, TCP and ICMP checksums
 /* save memory */
 #if ((defined(CFG_LWIP_MEM_POLICY))&&(CFG_LWIP_MEM_POLICY == LWIP_REDUCE_THE_PLAN))
 #define TCP_MSS                 (1500 - 40)
+
 /* TCP receive window. */
 #define TCP_WND                 (3 * TCP_MSS)
 /* TCP sender buffer space (bytes). */
@@ -415,12 +420,26 @@ The STM32F107 allows computing and verifying the IP, UDP, TCP and ICMP checksums
 #define TCP_SND_QUEUELEN        (20)
 #else
 #define TCP_MSS                 (1500 - 40)
+
+#if CFG_IPERF_TEST_ACCEL
+/* TCP receive window. */
+#define TCP_WND                 (16*TCP_MSS)
+/* TCP sender buffer space (bytes). */
+#define TCP_SND_BUF             (16*TCP_MSS)
+
+#define TCP_SND_QUEUELEN        (32)
+
+#else
+
 /* TCP receive window. */
 #define TCP_WND                 (10*TCP_MSS)
 /* TCP sender buffer space (bytes). */
 #define TCP_SND_BUF             (10*TCP_MSS)
 
 #define TCP_SND_QUEUELEN        (20)
+
+#endif /*end CFG_IPERF_TEST_ACCEL*/
+
 #endif
 
 /* ARP before DHCP causes multi-second delay  - turn it off */

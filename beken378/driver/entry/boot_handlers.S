@@ -342,7 +342,7 @@ boot_reset:
 
 	BOOT_CHANGE_MODE BOOT_MODE_UND BOOT_MODE_MASK
 	BOOT_SET_STACK   boot_stack_base_UNUSED boot_stack_len_UNUSED BOOT_COLOR_UNUSED
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 	B AFTER_FLAG
 	.org  0xc0 //0x100 - sizeof(section.vector) = 0x100 - 0x40
 	.word 0x32374B42
@@ -370,13 +370,13 @@ AFTER_FLAG:
     /*Stay in Supervisor Mode
       copy data from binary to ram*/
     BL _sysboot_copy_data_to_ram
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     BL _sysboot_copy_code_to_itcm
 #endif
     
     /*Init the BSS section*/
     BL _sysboot_zi_init
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     BL _sysboot_tcmbss_init
 #endif
     
@@ -460,7 +460,7 @@ _sysboot_zi_init:
     BLO 5b
     BX LR
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 /*FUNCTION:     _sysboot_copy_code_to_itcm*/
 /*DESCRIPTION:  copy itcm code from FLASH/ROM to SRAM*/
 _sysboot_copy_code_to_itcm:

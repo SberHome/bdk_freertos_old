@@ -5,9 +5,6 @@ $(NAME)_TYPE := kernel
 -include $(SOURCE_ROOT)/platform/mcu/$(HOST_MCU_FAMILY)/.config
 
 WPA_VERSION := wpa_supplicant-2.9
-ifeq ($(CFG_USE_WPA_29),0)
-WPA_VERSION := hostapd-2.5
-endif
 
 $(NAME)_INCLUDES := ../../app/standalone-ap \
 					../../app/standalone-station \
@@ -97,14 +94,14 @@ $(NAME)_INCLUDES += ./ble_lib/ip/ble/hl/api \
 					./ble_lib/modules/ke/api \
 					./ble_lib/modules/ke/src \
 					./ble_pub/prf \
-					./platform/7231n/rwip/api \
-					./platform/7231n/rwip/import/reg \
-					./platform/7231n/nvds/api \
-					./platform/7231n/config \
-					./platform/7231n/driver/reg \
-					./platform/7231n/driver/rf \
-					./platform/7231n/driver/uart \
-					./platform/7231n/entry \
+					./platform/2028n/rwip/api \
+					./platform/2028n/rwip/import/reg \
+					./platform/2028n/nvds/api \
+					./platform/2028n/config \
+					./platform/2028n/driver/reg \
+					./platform/2028n/driver/rf \
+					./platform/2028n/driver/uart \
+					./platform/2028n/entry \
 					./arch/armv5 \
 					./arch/armv5/ll \
 					./arch/armv5/compiler \
@@ -246,9 +243,9 @@ $(NAME)_SOURCES :=  ./ble_lib/ip/ble/hl/src/gap/gapc/gapc.c \
 					./ble_pub/app/src/app_ble_init.c \
 					./ble_pub/app/src/app_sdp.c \
 					./ble_pub/ui/ble_ui.c \
-					./platform/7231n/rwip/src/rwip.c \
-					./platform/7231n/rwip/src/rwble.c \
-					./platform/7231n/entry/ble_main.c \
-					./platform/7231n/driver/rf/rf_xvr.c \
-					./platform/7231n/driver/rf/ble_rf_port.c \
-					./platform/7231n/driver/uart/uart_ble.c
+					./platform/2028n/rwip/src/rwip.c \
+					./platform/2028n/rwip/src/rwble.c \
+					./platform/2028n/entry/ble_main.c \
+					./platform/2028n/driver/rf/rf_xvr.c \
+					./platform/2028n/driver/rf/ble_rf_port.c \
+					./platform/2028n/driver/uart/uart_ble.c

@@ -570,8 +570,9 @@ OSStatus rtos_deregister_timed_event( beken_timed_event_t* event_object);
   */
 uint32_t rtos_get_time(void);
 
+uint64_t rtos_get_time_us( void );
 
-/** 
+/**
   * @brief     Initialize a RTOS timer
   *
   * @note      Timer does not start running until @ref beken_start_timer is called

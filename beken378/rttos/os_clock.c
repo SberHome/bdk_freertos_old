@@ -309,7 +309,7 @@ void fclk_timer_hw_init(BK_HW_TIMER_INDEX timer_id)
 #endif
 
         param.p_Int_Handler   = fclk_hdl;
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
         param.duty_cycle1     = 0;
 #else
         param.duty_cycle      = 0;

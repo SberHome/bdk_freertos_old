@@ -6,7 +6,7 @@ source ./tools/scripts/build_include.sh
 if [ "$1" != "" ]; then
 	PLATFORM=$1
 else
-	PLATFORM=bk7231n
+	PLATFORM=bl2028n
 fi
 
 validate_platform $PLATFORM

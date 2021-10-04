@@ -231,11 +231,11 @@ SOC_NAME_MAP = beken7251.map
 SOC_NAME_LDS = bk7231.ld
 SOC_NAME_BSP_LDS = bk7231_bsp.ld
 else ifeq ($(CFG_SOC_NAME), 5)
-SOC_NAME_ELF = beken7231n.elf
-SOC_NAME_BIN = beken7231n.bin
-SOC_NAME_MAP = beken7231n.map
-SOC_NAME_LDS = bk7231n.lds
-SOC_NAME_BSP_LDS = bk7231n_bsp.lds
+SOC_NAME_ELF = beken2028n.elf
+SOC_NAME_BIN = beken2028n.bin
+SOC_NAME_MAP = beken2028n.map
+SOC_NAME_LDS = bl2028n.lds
+SOC_NAME_BSP_LDS = bl2028n_bsp.lds
 endif
 SOC_NAME_BSP_ELF = beken7231_bsp.elf
 SOC_NAME_BSP_BIN = beken7231_bsp.bin
@@ -307,7 +307,7 @@ application: $(OBJ_LIST) $(OBJ_S_LIST) $(OBJ_OS_LIST) $(WPA_LIB) $(RWNX_LIB) $(U
 	$(Q)$(ENCRYPT) $(BIN_DIR)/$(SOC_NAME_BIN) 0 $(ENCRYPT_ARGS) > /dev/null
 	$(Q)$(LD) $(LFLAGS) -o $(BIN_DIR)/$(SOC_NAME_BSP_ELF) $(OBJ_LIST) $(OBJ_S_LIST) $(OBJ_OS_LIST) $(LIBFLAGS) -T./build/$(SOC_NAME_BSP_LDS) -Xlinker -Map=$(BIN_DIR)/$(SOC_NAME_BSP_MAP)
 	$(Q)$(OBJCOPY) -O binary $(BIN_DIR)/$(SOC_NAME_BSP_ELF) $(BIN_DIR)/$(SOC_NAME_BSP_BIN)
-	$(Q)(cd ./tools/beken_packager; ./beken_packager_wrapper -i $(CFG_SOC_NAME))
+	$(Q)(cd ./tools/beken_packager; $(ECHO) "  $(GREEN)PACK $(SOC_NAME_BSP_BIN)$(NC)"; if [ "$(Q)" = "@" ]; then python ./beken_packager_wrapper -i $(CFG_SOC_NAME) > /dev/null; else python ./beken_packager_wrapper -i $(CFG_SOC_NAME); fi)
 
 	
 # Generate build info

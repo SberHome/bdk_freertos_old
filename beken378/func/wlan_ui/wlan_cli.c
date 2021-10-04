@@ -2026,6 +2026,10 @@ static void ble_command(char *pcWriteBuffer, int xWriteBufferLen, int argc, char
         appm_disconnect(0x13);
 #endif
     }
+	else if (os_strcmp(argv[1], "dut") == 0)
+    {
+		ble_dut_start();
+    }
 }
 #elif (CFG_BLE_VERSION == BLE_VERSION_5_x)
 #include "app_ble.h"
@@ -2445,6 +2449,7 @@ extern void cmd_rfcali_cfg_rate_dist(char *pcWriteBuffer, int xWriteBufferLen, i
 extern void cmd_rfcali_cfg_tssi_g(char *pcWriteBuffer, int xWriteBufferLen, int argc, char **argv);
 extern void cmd_rfcali_cfg_tssi_b(char *pcWriteBuffer, int xWriteBufferLen, int argc, char **argv);
 extern void cmd_rfcali_show_data(char *pcWriteBuffer, int xWriteBufferLen, int argc, char **argv);
+extern void lowvol_Sleep_Command(char *pcWriteBuffer, int xWriteBufferLen, int argc, char **argv);
 
 static void wifi_mgmt_filter_cb(uint8_t *data, int len, void *info)
 {
@@ -3507,7 +3512,9 @@ static const struct cli_command user_clis[] =
     {"mac", "mac <mac>, Get mac/Set mac. <mac>: c89346000001", mac_command},
     {"ps", "ps [func] [param]", Ps_Command},
     {"deep_sleep", "deep_sleep [param]", Deep_Sleep_Command},
-
+#if (1 == CFG_USE_FORCE_LOWVOL_PS)
+    {"lowvol_sleep", "lowvol_sleep [param]", lowvol_Sleep_Command},
+#endif
 #ifdef TCP_CLIENT_DEMO
     {"tcp_cont", "tcp_cont [ip] [port]", tcp_make_connect_server_command},
 #endif

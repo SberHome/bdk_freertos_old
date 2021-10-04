@@ -379,11 +379,6 @@ enum ENC_MODE
  */
 #define EM_BLE_END                              (EM_BLE_RX_ANTENNA_ID_END)
 #define EM_SIZE                     0x4000
-#if 0
-#if (EM_BLE_END > EM_SIZE)//20200729 check EM 16K bytes bondary 
-    #error "BLE EM Out of 16K byte"
-#endif //(EM_BLE_END > 0x4000)//20200729 check EM 16K bytes bondary 
-#endif
 
 /// @} EM
 

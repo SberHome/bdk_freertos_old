@@ -442,7 +442,7 @@ static void temp_detect_handler(void)
 
     if(tmp_detect_desc.current_sample_data_cnt >= tmp_detect_desc.data_buff_size)
     {
-#if (CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236)
+#if (CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236)
         UINT32 sum = 0, index, count = 0;
 
         temp_detect_disable();
@@ -615,7 +615,7 @@ static void temp_single_detect_handler(void)
                        tmp_single_desc.pData[2], tmp_single_desc.pData[3],
                        tmp_single_desc.pData[4]);
 
-#if (CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236)
+#if (CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236)
         sum1 = tmp_single_desc.pData[6] + tmp_single_desc.pData[7];
         sum2 = tmp_single_desc.pData[8] + tmp_single_desc.pData[9];
         sum = sum1 / 2 + sum2 / 2;

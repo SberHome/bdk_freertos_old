@@ -68,7 +68,11 @@
 #define RX_FRAME_THD                     (1)
 
 /// Threshold of frame upload preparation before which we handle the DMA interrupts
-#define RX_FRAME_PREP_THD                 4
+#if CFG_IPERF_TEST_ACCEL
+#define RX_FRAME_PREP_THD                16
+#else
+#define RX_FRAME_PREP_THD                4
+#endif
 
 /// Set bit in frame_info value (struct rxl_cntrl_rx_status)
 #define RXL_CNTRL_FRAME_INFO_SET(bit)                           \

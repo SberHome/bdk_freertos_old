@@ -46,7 +46,7 @@ case $1 in
 		modify_config ${SYS_CFG_FILE} CFG_WIFI_SENSOR 1
 		make_target="ip ble sensor cal supplicant uart_debug rf_test rf_use"
 		;;
-	bk7231n)
+	bl2028n)
 		modify_config ${SYS_CFG_FILE} CFG_SUPPORT_BLE 1
 		modify_config ${SYS_CFG_FILE} CFG_WIFI_SENSOR 1
 		make_target="ip ble sensor cal supplicant uart_debug rf_test rf_use"

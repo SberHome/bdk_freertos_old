@@ -202,7 +202,7 @@ static void gpio_enable_second_function(UINT32 func_mode)
     UINT32 start_index = 0;
     UINT32 config_mode = GMODE_SECOND_FUNC;
 
-#if ((SOC_BK7231U == CFG_SOC_NAME) || (SOC_BK7221U == CFG_SOC_NAME) || (SOC_BK7231N == CFG_SOC_NAME))
+#if ((SOC_BK7231U == CFG_SOC_NAME) || (SOC_BK7221U == CFG_SOC_NAME) || (SOC_BL2028N == CFG_SOC_NAME))
     UINT32 regist = 0, shift = 0;
 #endif // (CFG_SOC_NAME != SOC_BK7231)
 
@@ -229,7 +229,7 @@ static void gpio_enable_second_function(UINT32 func_mode)
         break;
 
     case GFUNC_MODE_ADC1:
-#if (SOC_BK7231N == CFG_SOC_NAME)
+#if (SOC_BL2028N == CFG_SOC_NAME)
         start_index = 26;
         end_index = 26;
         pmode = PERIAL_MODE_1;
@@ -242,7 +242,7 @@ static void gpio_enable_second_function(UINT32 func_mode)
         break;
 
     case GFUNC_MODE_ADC2:
-#if (SOC_BK7231N == CFG_SOC_NAME)
+#if (SOC_BL2028N == CFG_SOC_NAME)
         start_index = 24;
         end_index = 24;
         pmode = PERIAL_MODE_3;
@@ -398,7 +398,7 @@ static void gpio_enable_second_function(UINT32 func_mode)
         pmode = PERIAL_MODE_1;
         break;
 
-#if ((SOC_BK7231U == CFG_SOC_NAME) || (SOC_BK7221U == CFG_SOC_NAME) || (SOC_BK7231N == CFG_SOC_NAME))
+#if ((SOC_BK7231U == CFG_SOC_NAME) || (SOC_BK7221U == CFG_SOC_NAME) || (SOC_BL2028N == CFG_SOC_NAME))
     case GFUNC_MODE_DCMI:
         start_index = 27;
         end_index = 39;
@@ -406,7 +406,7 @@ static void gpio_enable_second_function(UINT32 func_mode)
         break;
 
     case GFUNC_MODE_ADC4:
-#if (SOC_BK7231N == CFG_SOC_NAME)
+#if (SOC_BL2028N == CFG_SOC_NAME)
         start_index = 28;
         end_index = 28;
         pmode = PERIAL_MODE_2;
@@ -419,7 +419,7 @@ static void gpio_enable_second_function(UINT32 func_mode)
         break;
 
     case GFUNC_MODE_ADC5:
-#if (SOC_BK7231N == CFG_SOC_NAME)
+#if (SOC_BL2028N == CFG_SOC_NAME)
         start_index = 22;
         end_index = 22;
         pmode = PERIAL_MODE_1;
@@ -432,7 +432,7 @@ static void gpio_enable_second_function(UINT32 func_mode)
         break;
 
     case GFUNC_MODE_ADC6:
-#if (SOC_BK7231N == CFG_SOC_NAME)
+#if (SOC_BL2028N == CFG_SOC_NAME)
         start_index = 21;
         end_index = 21;
         pmode = PERIAL_MODE_1;
@@ -513,7 +513,7 @@ static void gpio_enable_second_function(UINT32 func_mode)
 
     for(i = start_index; i <= end_index; i++)
     {
-        #if ((SOC_BK7231U == CFG_SOC_NAME) || (SOC_BK7221U == CFG_SOC_NAME) || (SOC_BK7231N == CFG_SOC_NAME))
+        #if ((SOC_BK7231U == CFG_SOC_NAME) || (SOC_BK7221U == CFG_SOC_NAME) || (SOC_BL2028N == CFG_SOC_NAME))
         if((func_mode == GFUNC_MODE_DCMI) && (i == GPIO28))
             continue;        
         #endif // (CFG_SOC_NAME != SOC_BK7231)
@@ -535,7 +535,7 @@ static void gpio_enable_second_function(UINT32 func_mode)
 
         reg = (reg & ~(0x3u << shift)) | ((pmode & 0x3u) << shift);
         REG_WRITE(regist, reg);
-        #elif (SOC_BK7231N == CFG_SOC_NAME)
+        #elif (SOC_BL2028N == CFG_SOC_NAME)
         if(i < GPIO16) {
             regist = REG_GPIO_FUNC_CFG;
             shift = i * 2;
@@ -727,7 +727,7 @@ void gpio_int_enable(UINT32 index, UINT32 mode, void (*p_Int_Handler)(unsigned c
     if (index <= GPIO15) {
         *(volatile UINT32 *)REG_GPIO_INTLV0 = (*(volatile UINT32 *)REG_GPIO_INTLV0 & (~(0x03 << (index << 1)))) | (mode << (index << 1));
     }
-#if ((SOC_BK7231N != CFG_SOC_NAME))
+#if ((SOC_BL2028N != CFG_SOC_NAME))
     else  if ((index >= GPIO16) &&(index <= GPIO31)) {
 #else
     else  if ((index >= GPIO16) && (index < GPIONUM)) {

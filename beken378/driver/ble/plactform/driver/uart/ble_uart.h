@@ -37,7 +37,7 @@
 #if UART_PRINTF_EN
 #define UART_PRINTF bk_printf //uart_printf 
 #else
-#define UART_PRINTF os_null_printf 
+#define UART_PRINTF(...)
 #endif // #if UART_PRINTF_EN
 
 #define uart_printf bk_printf

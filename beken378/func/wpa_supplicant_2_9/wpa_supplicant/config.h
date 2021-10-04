@@ -1538,7 +1538,7 @@ struct wpa_config {
 	 */
 	int disable_btm;
 
-	int auth_dur;
+	int auth_dur;	/* network re-enabled timeout when connect failed */
 };
 
 

@@ -76,7 +76,7 @@ extern void bk7011_cal_pll(void);
  */
 const uint32_t agc_ram_parameter[] =
 {
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 	0x30000000,
 	0x01000000,
 	0xa8000016,
@@ -1854,7 +1854,7 @@ static void phy_mdm_init(uint32_t tx_dc_off_comp)
     // Enable CCA lock IRQ
     mdm_irqctrl_set(MDM_IRQCCATIMEOUTEN_BIT);
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     REG_WRITE((REG_MDM_CFG_BASE_ADDR + 0x226 * 4), REG_READ(REG_MDM_CFG_BASE_ADDR + 0x226 * 4) & 0xFFFE); //peak_cancel_bypass=0
 #endif
 
@@ -1907,7 +1907,7 @@ static void phy_agc_init(void)
 
     // ADC sat thd
     agc_rwnxagcsat_set(0x08393537);
-#elif (SOC_BK7231N == CFG_SOC_NAME)
+#elif (SOC_BL2028N == CFG_SOC_NAME)
     /* qunshan20210325 change from 0x806 to 0x506,aim to increase RSSI +3 */
     REG_PL_WR(REG_AGC_BASE_ADDR + 0x890, 0x506);  // Enable AGC OPT
     agc_rwnxagcevtsat_set(0x05044804);
@@ -1952,14 +1952,14 @@ static void phy_agc_init(void)
     agc_rwnxagcccatimeout_set(8000000); // 100ms
 
     // AGCGain Range
-#if (SOC_BK7231N == CFG_SOC_NAME)
+#if (SOC_BL2028N == CFG_SOC_NAME)
     agc_rwnxagcgainrg_set(0x4e08);
 #else
     agc_rfgainmaxdb_setf(0x4b);
 #endif
 
     // AGC Power Estimate Bias
-#if (SOC_BK7231N == CFG_SOC_NAME)
+#if (SOC_BL2028N == CFG_SOC_NAME)
     agc_vpeakadcqdbv_setf((uint8_t) - 32); //change MDM_reg819<23:16> from 0xEC to 0xE0 by cunliang20201112
 #else
     agc_vpeakadcqdbv_setf((uint8_t) - 32);
@@ -2655,7 +2655,7 @@ void phy_set_channel(uint8_t band, uint8_t type, uint16_t prim20_freq,
     }
     else
     {
-#if (SOC_BK7231N == CFG_SOC_NAME)
+#if (SOC_BL2028N == CFG_SOC_NAME)
         rwnx_cal_set_20M_setting();
 #endif
         //agc_rwnxagcsat_set(0x8393537);
@@ -2848,7 +2848,7 @@ void phy_init_after_wakeup(void)
     phy_set_channel(PHY_BAND_2G4, PHY_CHNL_BW_20, freq, freq, 0, PHY_PRIM);
 }
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 void phy_wakeup_rf_reinit(void)
 {
     struct phy_env_tag phy_env_sleep;

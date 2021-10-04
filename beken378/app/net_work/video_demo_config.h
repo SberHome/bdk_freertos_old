@@ -5,7 +5,7 @@
 
 #define APP_DEMO_VIDEO_TRANSFER           0
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 #undef  APP_DEMO_VIDEO_TRANSFER
 #define APP_DEMO_VIDEO_TRANSFER           0
 #endif

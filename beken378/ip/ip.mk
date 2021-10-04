@@ -5,9 +5,6 @@ $(NAME)_TYPE := kernel
 -include $(SOURCE_ROOT)/platform/mcu/$(HOST_MCU_FAMILY)/.config
 
 WPA_VERSION := wpa_supplicant_2_9
-ifeq ($(CFG_USE_WPA_29),0)
-WPA_VERSION := hostapd-2.5
-endif
 
 $(NAME)_INCLUDES := ke \
 					mac \
@@ -132,14 +129,14 @@ $(NAME)_INCLUDES += ../driver/ble_5_x_rw/ble_lib/ip/ble/hl/api \
 					../driver/ble_5_x_rw/ble_pub/profiles/comm/api \
 					../driver/ble_5_x_rw/ble_pub/app/api \
 					../driver/ble_5_x_rw/ble_pub/ui \
-					../driver/ble_5_x_rw/platform/7231n/rwip/api \
-					../driver/ble_5_x_rw/platform/7231n/rwip/import/reg \
-					../driver/ble_5_x_rw/platform/7231n/nvds/api \
-					../driver/ble_5_x_rw/platform/7231n/config \
-					../driver/ble_5_x_rw/platform/7231n/driver/reg \
-					../driver/ble_5_x_rw/platform/7231n/driver/rf \
-					../driver/ble_5_x_rw/platform/7231n/driver/uart \
-					../driver/ble_5_x_rw/platform/7231n/entry \
+					../driver/ble_5_x_rw/platform/2028n/rwip/api \
+					../driver/ble_5_x_rw/platform/2028n/rwip/import/reg \
+					../driver/ble_5_x_rw/platform/2028n/nvds/api \
+					../driver/ble_5_x_rw/platform/2028n/config \
+					../driver/ble_5_x_rw/platform/2028n/driver/reg \
+					../driver/ble_5_x_rw/platform/2028n/driver/rf \
+					../driver/ble_5_x_rw/platform/2028n/driver/uart \
+					../driver/ble_5_x_rw/platform/2028n/entry \
 					../driver/ble_5_x_rw/arch/armv5 \
 					../driver/ble_5_x_rw/arch/armv5/ll \
 					../driver/ble_5_x_rw/arch/armv5/compiler

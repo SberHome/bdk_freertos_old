@@ -67,7 +67,7 @@ typedef enum
 ******************************************************/
 
 
-#if (CFG_SOC_NAME != SOC_BK7231N)
+#if (CFG_SOC_NAME != SOC_BL2028N)
 /**@brief Initialises a PWM pin
  *
  * @note  Prepares a Pulse-Width Modulation pin for use.
@@ -147,7 +147,7 @@ OSStatus bk_pwm_stop(bk_pwm_t pwm);
 UINT32 bk_pwm_get_capvalue(bk_pwm_t pwm);
 
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 
 /**@brief Set PWM as group output
  *

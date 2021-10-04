@@ -68,7 +68,7 @@ enum
     CMD_BLE_RF_BIT_SET,
     CMD_BLE_RF_BIT_CLR,
     CMD_BLE_RF_BIT_GET,
-	#if (CFG_SOC_NAME == SOC_BK7231N)
+	#if (CFG_SOC_NAME == SOC_BL2028N)
 
 	CMD_BLE_RF_PTA_EN,
 	CMD_BLE_RF_PTA_DIS,
@@ -83,7 +83,7 @@ enum
     CMD_SCTRL_UNCONDITIONAL_MAC_UP,
 #endif // (CFG_SOC_NAME != SOC_BK7231)
 
-#if (CFG_SOC_NAME != SOC_BK7231) && (CFG_SOC_NAME != SOC_BK7231N)
+#if (CFG_SOC_NAME != SOC_BK7231) && (CFG_SOC_NAME != SOC_BL2028N)
     CMD_QSPI_VDDRAM_VOLTAGE,
     CMD_QSPI_IO_VOLTAGE,
     #endif // (CFG_SOC_NAME != SOC_BK7231)
@@ -168,7 +168,7 @@ enum
 #define BLK_BIT_AUDIO_PLL                        (1 << 16)
 #define BLK_BIT_AUDIO_RANDOM_GENERATOR           (1 << 15)
 #define BLK_BIT_USB                              (1 << 14)
-#elif (CFG_SOC_NAME == SOC_BK7231N)
+#elif (CFG_SOC_NAME == SOC_BL2028N)
 #define BLK_BIT_AUDIO_RANDOM_GENERATOR           (1 << 15)
 #elif (CFG_SOC_NAME == SOC_BK7221U)
 #define BLK_BIT_NC                               (1 << 19)
@@ -222,7 +222,7 @@ enum
 
 #if (CFG_SOC_NAME == SOC_BK7231U)
 #define DEFAULT_TXID_XTAL                        (0x19)
-#elif (CFG_SOC_NAME == SOC_BK7231N)
+#elif (CFG_SOC_NAME == SOC_BL2028N)
 #if (CFG_XTAL_FREQUENCE == CFG_XTAL_FREQUENCE_40M)
 #define DEFAULT_TXID_XTAL                        (0x70)
 #else
@@ -232,7 +232,7 @@ enum
 #define DEFAULT_TXID_XTAL                        (0x10)
 #endif // (CFG_SOC_NAME == SOC_BK7231U)
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 #define PARAM_XTALH_CTUNE_MASK                   (0x7F)
 
 #define PARAM_AUD_DAC_GAIN_MASK                  (0x1F)
@@ -247,7 +247,7 @@ enum
 #define LPO_SELECT_32K_XTAL                         (0x1)
 #define LPO_SELECT_32K_DIV                          (0x2)
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 #define SW_RETENTION_WDT_FLAG                       (1 << 16)
 #define SW_RETENTION_WDT_FLAG_POS                   (16)
 #define SW_RETENTION_VAL_MASK                       (0XFFFF)
@@ -255,6 +255,7 @@ enum
 #endif
 
 /* CMD_RF_HOLD_BIT_SET/_CLR*/
+#define RF_HOLD_RF_SLEEP_BIT                         (1 << 15)
 #define RF_HOLD_BY_USER_BIT                          (1 << 14)
 #define RF_HOLD_BY_BKREG_BIT                         (1 << 13)
 #define RF_HOLD_BY_ATE_BIT                           (1 << 12)
@@ -382,4 +383,7 @@ extern void sctrl_rf_ps_enable_clear(void);
 extern int sctrl_rf_ps_enabled(void);
 RESET_SOURCE_STATUS sctrl_get_deep_sleep_wake_soure(void);
 UINT8 sctrl_if_mcu_can_sleep(void);
+extern int bk_misc_wakeup_get_gpio_num(void);
+extern UINT32 sctrl_get_deep_sleep_gpio_floating_map(void);
+
 #endif // _SCTRL_PUB_H_

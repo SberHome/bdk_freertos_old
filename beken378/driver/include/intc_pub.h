@@ -3,7 +3,7 @@
 
 #include "generic.h"
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 #define FIQ_BT                           (31)
 #define FIQ_BLE                          (30)
 #define FIQ_BTDM                         (29)
@@ -76,7 +76,7 @@
 #define IRQ_UART1                        (0) 
 #endif 
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 #define PRI_FIQ_BT                           (7)
 #define PRI_FIQ_BLE                          (8)
 #define PRI_FIQ_BTDM                         (13)
@@ -130,8 +130,16 @@
 #define PRI_IRQ_FFT                          (13) 
 #define PRI_IRQ_USB                          (14) 
 #define PRI_IRQ_SD                           (15) 
-#define PRI_IRQ_SARADC                       (16) 
-#define PRI_IRQ_AUDIO                        (27) 
+#define PRI_IRQ_SARADC                       (16)
+#if CFG_USE_FFT == 0
+#define PRI_IRQ_AUDIO                        (13)
+#elif CFG_USE_I2S == 0
+#define PRI_IRQ_AUDIO                        (22)
+#elif CFG_USE_IRDA == 0
+#define PRI_IRQ_AUDIO                        (23)
+#else
+#define PRI_IRQ_AUDIO                        (27)
+#endif
 #define PRI_IRQ_PWM                          (17) 
 #if (CFG_SOC_NAME == SOC_BK7231)
 #define PRI_IRQ_TL410_WATCHDOG               (18)

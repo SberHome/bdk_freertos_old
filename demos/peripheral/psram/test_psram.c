@@ -24,7 +24,7 @@ void qspi_psram_single_init(void)
 	qspi_cfg.rd_dummy_size = line_mode ? 0x06 : 0x00;
 	qspi_cfg.voltage_level = 2;
 
-	if (MODE_PSRAM_SINGLE == line_mode)
+	if (MODE_PSRAM_QUAD == line_mode)
 		is_single_mode = 1;
 
 	bk_qspi_psram_quad_mode_switch(is_single_mode);
@@ -51,7 +51,7 @@ void qspi_psram_quad_init(void)
 	qspi_cfg.rd_dummy_size = line_mode ? 0x06 : 0x00;
 	qspi_cfg.voltage_level = 2;
 
-	if (MODE_PSRAM_SINGLE == line_mode)
+	if (MODE_PSRAM_QUAD == line_mode)
 		is_single_mode = 1;
 
 	bk_qspi_psram_quad_mode_switch(is_single_mode);

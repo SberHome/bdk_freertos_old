@@ -473,8 +473,9 @@ BOOL rtos_is_queue_full( beken_queue_t* queue );
   */
 uint32_t rtos_get_time(void);
 
+uint64_t rtos_get_time_us( void );
 
-/** 
+/**
   * @brief     Initialize a RTOS timer
   *
   * @note      Timer does not start running until @ref beken_start_timer is called

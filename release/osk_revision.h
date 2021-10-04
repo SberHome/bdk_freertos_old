@@ -1,1 +1,1 @@
-#define BEKEN_OSK_REV	"F-3.0.22"
+#define BEKEN_OSK_REV	"F-3.0.23"

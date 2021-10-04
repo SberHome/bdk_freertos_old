@@ -1,11 +1,12 @@
 #ifndef _SPI_PUB_H_
 #define _SPI_PUB_H_
 
+#include "uart_pub.h"
+
 #define SPI_FAILURE                (1)
 #define SPI_SUCCESS                (0)
 
 #define SPI_DEV_NAME                "spi"
-
 #define SPI_CMD_MAGIC              (0xe250000)
 enum
 {
@@ -39,18 +40,16 @@ enum
     CMD_SPI_CS_EN,
 };
 
-#define BK_SPI_DEBUG                1
-#include "uart_pub.h"
+#define BK_SPI_DEBUG                0
+
 #if BK_SPI_DEBUG
-
 #define BK_SPI_PRT               warning_prf
-
 #define BK_SPI_WPRT              warning_prf
 #define BK_SPI_FATAL             fatal_prf
 #else
-#define BK_SPI_PRT		null_prf
-#define BK_SPI_WPRT		null_prf
-#define BK_SPIFATAL		null_prf
+#define BK_SPI_PRT		    null_prf
+#define BK_SPI_WPRT		    null_prf
+#define BK_SPI_FATAL		null_prf
 #endif
 
 #define USE_SPI_GPIO_14_17          (0)
@@ -85,7 +84,7 @@ enum
 
 struct spi_message
 {
-#if (CFG_SOC_NAME != SOC_BK7231N) && (CFG_SOC_NAME != SOC_BK7236)
+#if (CFG_SOC_NAME != SOC_BL2028N) && (CFG_SOC_NAME != SOC_BK7236)
     UINT8 *send_buf;
     UINT32 send_len;
 

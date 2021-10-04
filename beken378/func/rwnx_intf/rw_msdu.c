@@ -614,8 +614,9 @@ UINT32 rwm_transfer(UINT8 vif_idx, UINT8 *buf, UINT32 len, int sync, void *args)
         #if NX_POWERSAVE
         txl_cntrl_dec_pck_cnt();
         #endif
-
+#if !defined(CFG_IPERF_TEST_ACCEL) || (CFG_IPERF_TEST_ACCEL==0)
         os_printf("rwm_transfer no node\r\n");
+#endif
         goto tx_exit;
     }
     rwm_tx_msdu_renew(buf, len, node->msdu_ptr);

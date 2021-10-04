@@ -3,7 +3,7 @@
 
 #include "sys_config.h"
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 #define REG_LA_OFFSET 0x00000000
 
 #define REG_LA_BASE_ADDR 0x00808000

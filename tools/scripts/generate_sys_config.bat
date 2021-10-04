@@ -15,8 +15,8 @@ if "%1" equ "bk7231u" (
 set new_sys_config=beken378\app\config\sys_config_bk7231u.h
 goto update_sys_config
 )
-if "%1" equ "bk7231n" (
-set new_sys_config=beken378\app\config\sys_config_bk7231n.h
+if "%1" equ "bl2028n" (
+set new_sys_config=beken378\app\config\sys_config_bl2028n.h
 goto update_sys_config
 )
 if "%1" equ "bk7251" (

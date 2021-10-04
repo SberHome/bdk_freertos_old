@@ -54,6 +54,7 @@ static SCTRL_PS_SAVE_VALUES ps_saves[2];
 #if (CFG_USE_DEEP_PS && PS_SUPPORT_MANUAL_SLEEP)
 static UINT32 ps_block_value = 0;
 #endif
+UINT32 deep_sleep_gpio_floating_map = 0;
 
 static SCTRL_MCU_PS_INFO sctrl_mcu_ps_info =
 {
@@ -76,7 +77,7 @@ UINT32 sta_rf_sleeped = 0;
 
 static void sctrl_rf_init(void);
 extern void WFI( void );
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 void sctrl_fix_dpll_div(void);
 #endif
 
@@ -115,7 +116,7 @@ void sctrl_cali_dpll(UINT8 flag)
 {
     UINT32 param;
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     extern void bk7011_update_tx_power_when_cal_dpll(int start_or_stop);
 
 	bk7011_update_tx_power_when_cal_dpll(1);
@@ -145,14 +146,20 @@ void sctrl_cali_dpll(UINT8 flag)
     param |= (SPI_DET_EN);
     sctrl_analog_set(SCTRL_ANALOG_CTRL0, param);
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     bk7011_update_tx_power_when_cal_dpll(0);
 #endif
 }
 
 void sctrl_dpll_isr(void)
 {
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
+	if ((DEVICE_ID_BK7231N_P & DEVICE_ID_MASK) != (sctrl_ctrl(CMD_GET_DEVICE_ID, NULL) & DEVICE_ID_MASK))
+	{
+		os_printf("BIAS Cali\r\n");
+		bk7011_cal_bias();
+	}
+#elif (CFG_SOC_NAME == SOC_BK7236)
 	os_printf("BIAS Cali\r\n");
     bk7011_cal_bias();
 #endif
@@ -198,7 +205,7 @@ void sctrl_dco_cali(UINT32 speed)
         reg_val = sctrl_analog_get(SCTRL_ANALOG_CTRL1);
         reg_val &= ~((DCO_CNTI_MASK << DCO_CNTI_POSI) | (DCO_DIV_MASK << DCO_DIV_POSI));
         reg_val |= ((0xDD & DCO_CNTI_MASK) << DCO_CNTI_POSI);
-#if (CFG_SOC_NAME != SOC_BK7231N)
+#if (CFG_SOC_NAME != SOC_BL2028N)
         reg_val |= DIV_BYPASS_BIT;
 #endif
         sctrl_analog_set(SCTRL_ANALOG_CTRL1, reg_val);
@@ -237,7 +244,7 @@ void sctrl_dco_cali(UINT32 speed)
 
     reg_val = sctrl_analog_get(SCTRL_ANALOG_CTRL1);
     reg_val &= ~(SPI_RST_BIT);
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     reg_val &= ~(DCO_AMSEL_BIT);
 #endif
     sctrl_analog_set(SCTRL_ANALOG_CTRL1, reg_val);
@@ -382,7 +389,7 @@ void sctrl_init(void)
     #endif // (CFG_SOC_NAME == SOC_BK7221U)
     #if CFG_SYS_REDUCE_NORMAL_POWER
     param |= ((MCLK_DIV_7 & MCLK_DIV_MASK) << MCLK_DIV_POSI);
-	#elif (CFG_SOC_NAME == SOC_BK7231N)
+	#elif (CFG_SOC_NAME == SOC_BL2028N)
     param |= ((MCLK_DIV_5 & MCLK_DIV_MASK) << MCLK_DIV_POSI);
     #elif (CFG_SOC_NAME == SOC_BK7271)
     param |= ((MCLK_DIV_3 & MCLK_DIV_MASK) << MCLK_DIV_POSI);
@@ -390,7 +397,7 @@ void sctrl_init(void)
     param |= ((MCLK_DIV_3 & MCLK_DIV_MASK) << MCLK_DIV_POSI);
     #endif // CFG_SYS_REDUCE_NORMAL_POWER
     param |= ((MCLK_FIELD_DPLL & MCLK_MUX_MASK) << MCLK_MUX_POSI);
-	#if (CFG_SOC_NAME == SOC_BK7231N)
+	#if (CFG_SOC_NAME == SOC_BL2028N)
 	param |= (BLE_RF_PTA_EN_BIT);
 	#endif
     REG_WRITE(SCTRL_CONTROL, param);
@@ -408,7 +415,7 @@ void sctrl_init(void)
     //170209,from 0x819A54B to 0x819A55B for auto detect dpll unlock
     //170614 from 0x819A55B to 0x819A59B for more easy to trigger
     //181101 xamp:0xf-0 for xtal may dead
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 #if (CFG_XTAL_FREQUENCE == CFG_XTAL_FREQUENCE_40M)
     param = 0x71125B57;
 #else
@@ -421,7 +428,7 @@ void sctrl_init(void)
 
     sctrl_cali_dpll(0);
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     param = 0x3CC019C2;//wangjian20200918 Reg0x17<1>=1
 #else
     param = 0x6AC03102;
@@ -435,8 +442,17 @@ void sctrl_init(void)
 
 #if (CFG_SOC_NAME == SOC_BK7231)
     param = 0x24006000;
-#elif (CFG_SOC_NAME == SOC_BK7231N)
-    param = 0x500020E2;//0x400020E0; //wangjian20200822 0x40032030->0x48032030->0x48022032//wangjian20200903<17:16>=0//qunshan20201127<28:23>=20
+#elif (CFG_SOC_NAME == SOC_BL2028N)
+	if ((DEVICE_ID_BK7231N_P & DEVICE_ID_MASK) == (sctrl_ctrl(CMD_GET_DEVICE_ID, NULL) & DEVICE_ID_MASK))
+	{
+		param = 0x580020E2;//wangjian20210422<28:23>=30 as default for BK7231P
+	}
+	else
+	{
+		param = 0x500020E2;//0x400020E0; //wangjian20200822 0x40032030->0x48032030->0x48022032//wangjian20200903<17:16>=0//qunshan20201127<28:23>=20
+	}
+#elif (CFG_SOC_NAME == SOC_BK7236)
+	param = 0x500020E2;//0x400020E0; //wangjian20200822 0x40032030->0x48032030->0x48022032//wangjian20200903<17:16>=0//qunshan20201127<28:23>=20
 #elif (CFG_SOC_NAME == SOC_BK7271)
     param = 0x80208B00; //for 32k if enable BLK_BIT_ROSC32K
 #else
@@ -448,7 +464,7 @@ void sctrl_init(void)
 
     #if (CFG_SOC_NAME == SOC_BK7221U)
     param = CHARGE_ANALOG_CTRL3_CHARGE_DEFAULT_VALUE;
-#elif (CFG_SOC_NAME == SOC_BK7231N)
+#elif (CFG_SOC_NAME == SOC_BL2028N)
     param = 0x70000000; //wangjiang20200822 0x00000000->0x70000000
     #else
     param = 0x4FE06C50;
@@ -460,7 +476,7 @@ void sctrl_init(void)
     param = 0x59E04520;
     #elif (CFG_SOC_NAME == SOC_BK7221U)
     param = CHARGE_ANALOG_CTRL4_CAL_DEFAULT_VALUE;
-#elif (CFG_SOC_NAME == SOC_BK7231N)
+#elif (CFG_SOC_NAME == SOC_BL2028N)
     param = 0x19C04520;
     #else
     param = 0x59C04520;  // 0x59E04520
@@ -472,15 +488,17 @@ void sctrl_init(void)
 
     sctrl_sub_reset();
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
-    sctrl_fix_dpll_div();
+#if (CFG_SOC_NAME == SOC_BL2028N)
+	if ((DEVICE_ID_BK7231N_P & DEVICE_ID_MASK) != (sctrl_ctrl(CMD_GET_DEVICE_ID, NULL) & DEVICE_ID_MASK)) {
+		sctrl_fix_dpll_div();
+	}
 #endif
 
 	/*sys ctrl clk gating, for rx dma dead*/
 	REG_WRITE(SCTRL_CLK_GATING, 0x3f);
 
 	/* increase VDD voltage*/
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 	param = 4;//wyg// original=3
     #elif CFG_SYS_REDUCE_NORMAL_POWER
 	param = 4;
@@ -544,7 +562,7 @@ static void sctrl_rf_init(void)
 
 void ps_delay(volatile UINT16 times)
 {
-	UINT32	delay = times;
+	volatile UINT32	delay = times;
     while(delay--) ;
 }
 
@@ -639,7 +657,7 @@ void sctrl_hw_sleep(UINT32 peri_clk)
     {
         reg = REG_READ(ICU_ARM_WAKEUP_EN);
         reg |= (BLE_ARM_WAKEUP_EN_BIT);
-        #if (CFG_SOC_NAME == SOC_BK7231N)
+        #if (CFG_SOC_NAME == SOC_BL2028N)
         reg |= (BTDM_ARM_WAKEUP_EN_BIT);
         #endif
         REG_WRITE(ICU_ARM_WAKEUP_EN, reg);
@@ -805,28 +823,32 @@ UINT8 sctrl_if_rf_sleep(void)
 
 void sctrl_rf_ps_enable_set(void)
 {
-    GLOBAL_INT_DECLARATION();
-    GLOBAL_INT_DISABLE();
-    rf_sleepe_enable = 1;
-    GLOBAL_INT_RESTORE();
+	GLOBAL_INT_DECLARATION();
+	GLOBAL_INT_DISABLE();
+	rf_sleepe_enable = 1;
+	UINT32 reg = RF_HOLD_RF_SLEEP_BIT;
+	sddev_control(SCTRL_DEV_NAME, CMD_RF_HOLD_BIT_CLR, &reg);
+	GLOBAL_INT_RESTORE();
 }
 
 void sctrl_rf_ps_enable_clear(void)
 {
-    GLOBAL_INT_DECLARATION();
-    GLOBAL_INT_DISABLE();
-    rf_sleepe_enable = 0;
-    GLOBAL_INT_RESTORE();
+	GLOBAL_INT_DECLARATION();
+	GLOBAL_INT_DISABLE();
+	rf_sleepe_enable = 0;
+	UINT32 reg = RF_HOLD_RF_SLEEP_BIT;
+	sddev_control(SCTRL_DEV_NAME, CMD_RF_HOLD_BIT_SET, &reg);
+	GLOBAL_INT_RESTORE();
 }
 
 int sctrl_rf_ps_enabled(void)
 {
-    uint32_t value = 0;
-    GLOBAL_INT_DECLARATION();
-    GLOBAL_INT_DISABLE();
-    value =  rf_sleepe_enable;
-    GLOBAL_INT_RESTORE();
-    return (value > 0) ? 1 : 0;
+	uint32_t value = 0;
+	GLOBAL_INT_DECLARATION();
+	GLOBAL_INT_DISABLE();
+	value =  rf_sleepe_enable;
+	GLOBAL_INT_RESTORE();
+	return (value > 0) ? 1 : 0;
 }
 
 int sctrl_rf_wakeup_enabled(void)
@@ -837,7 +859,7 @@ int sctrl_rf_wakeup_enabled(void)
 
 static void sctrl_rf_sleep(void)
 {
-    #if (!CFG_USE_PTA)
+	#if (!CFG_USE_PTA)
     if(sctrl_rf_ps_enabled() == 1)
     {
     UINT32 reg;
@@ -867,11 +889,11 @@ static void sctrl_rf_sleep(void)
 
 static void sctrl_rf_wakeup(void)
 {
-    #if (!CFG_USE_PTA)
+	#if (!CFG_USE_PTA)
     if(sctrl_rf_wakeup_enabled() == 1)
     {
 	    UINT32 reg;
-	    GLOBAL_INT_DECLARATION();
+ 	    GLOBAL_INT_DECLARATION();
 
 	    GLOBAL_INT_DISABLE();
 	    if(rf_sleeped == 1)
@@ -894,8 +916,10 @@ static void sctrl_rf_wakeup(void)
 			rc_cntl_stat_set(0x09);
 			PS_DEBUG_UP_TRIGER;
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
+		if ((DEVICE_ID_BK7231N_P & DEVICE_ID_MASK) != (sctrl_ctrl(CMD_GET_DEVICE_ID, NULL) & DEVICE_ID_MASK)) {
 			sctrl_fix_dpll_div();
+		}
 			phy_wakeup_rf_reinit();
 #endif
 
@@ -961,7 +985,7 @@ void sctrl_sta_rf_wakeup(void)
         reg = RF_HOLD_BY_STA_BIT;
         sddev_control(SCTRL_DEV_NAME, CMD_RF_HOLD_BIT_SET, &reg);
 
-    #if (CFG_SOC_NAME == SOC_BK7231N)
+    #if (CFG_SOC_NAME == SOC_BL2028N)
         phy_wakeup_wifi_reinit();
     #endif
 
@@ -1112,7 +1136,7 @@ void sctrl_subsys_power(UINT32 cmd)
         reg_word = DSP_PWU;
         break;
 
-#if (CFG_SOC_NAME != SOC_BK7231N)
+#if (CFG_SOC_NAME != SOC_BL2028N)
     case CMD_SCTRL_USB_POWERDOWN:
         reg = SCTRL_USB_PWR;
         reg_val = REG_READ(SCTRL_USB_PWR);
@@ -1229,7 +1253,7 @@ void sctrl_subsys_reset(UINT32 cmd)
     return;
 }
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 void sctrl_fix_dpll_div(void)
 {
 	volatile INT32   i;
@@ -1266,7 +1290,7 @@ void sctrl_fix_dpll_div(void)
 }
 #endif
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 void sctrl_mdm_reset(void)
 {
     volatile INT32 i;
@@ -1860,7 +1884,7 @@ void sctrl_enter_rtos_deep_sleep(PS_DEEP_CTRL_PARAM *deep_param)
 	uart1_exit();
 #endif
 
-#if (CFG_SOC_NAME == SOC_BK7231U) || (SOC_BK7231N == CFG_SOC_NAME)
+#if (CFG_SOC_NAME == SOC_BK7231U) || (SOC_BL2028N == CFG_SOC_NAME)
     reg = REG_READ(SCTRL_LOW_PWR_CLK);
     reg &=~(LPO_CLK_MUX_MASK);
     reg |=(LPO_SRC_ROSC << LPO_CLK_MUX_POSI);
@@ -1897,7 +1921,7 @@ void sctrl_enter_rtos_deep_sleep(PS_DEEP_CTRL_PARAM *deep_param)
     REG_WRITE(SCTRL_GPIO_WAKEUP_EN,0x0);  //sys_ctrl : 0x48;
     REG_WRITE(SCTRL_GPIO_WAKEUP_INT_STATUS,0xFFFFFFFF);  //sys_ctrl : 0x4a;
 
-#if (CFG_SOC_NAME != SOC_BK7231N)
+#if (CFG_SOC_NAME != SOC_BL2028N)
 	/*	disable gpio32~39*/
 	REG_WRITE(SCTRL_GPIO_WAKEUP_EN1,0x0);  //sys_ctrl : 0x51;
 	REG_WRITE(SCTRL_GPIO_WAKEUP_INT_STATUS1,0xFF);  //sys_ctrl : 0x53;
@@ -1983,7 +2007,7 @@ void sctrl_enter_rtos_deep_sleep(PS_DEEP_CTRL_PARAM *deep_param)
     }
     REG_WRITE(SCTRL_BLOCK_EN_CFG, reg);                  //sys_ctrl : 0x4B;                   //'E'
 
-#if (CFG_SOC_NAME != SOC_BK7231U) && (SOC_BK7231N != CFG_SOC_NAME)
+#if (CFG_SOC_NAME != SOC_BK7231U) && (SOC_BL2028N != CFG_SOC_NAME)
     reg = REG_READ(SCTRL_ROSC_CAL);                           //ROSC Calibration disable
     reg =(reg  & (~0x01));
     REG_WRITE(SCTRL_ROSC_CAL, reg);
@@ -1991,7 +2015,7 @@ void sctrl_enter_rtos_deep_sleep(PS_DEEP_CTRL_PARAM *deep_param)
 
     for(i=0; i<GPIONUM; i++)
     {
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
         if(((i > GPIO1) && (i < GPIO6))
             || ((i > GPIO11) && (i < GPIO14))
             || ((i > GPIO17) && (i < GPIO20))
@@ -2045,7 +2069,7 @@ void sctrl_enter_rtos_deep_sleep(PS_DEEP_CTRL_PARAM *deep_param)
         }
     }
 
-#if ((CFG_SOC_NAME != SOC_BK7231N) && (CFG_SOC_NAME != SOC_BK7236))
+#if ((CFG_SOC_NAME != SOC_BL2028N) && (CFG_SOC_NAME != SOC_BK7236))
     if ((deep_param->wake_up_way & PS_DEEP_WAKEUP_GPIO))
     {
         for (i = 0; i < BITS_INT; i++)
@@ -2060,7 +2084,13 @@ void sctrl_enter_rtos_deep_sleep(PS_DEEP_CTRL_PARAM *deep_param)
             {
                 if( deep_param->gpio_edge_map & (0x01UL << i))      //0:high,1:low.
                 {
-                    param = GPIO_CFG_PARAM(i, GMODE_INPUT_PULLUP);
+                    if(sctrl_get_deep_sleep_gpio_floating_map() & (0x01UL << i))
+                    {
+                        param = GPIO_CFG_PARAM(i, GMODE_INPUT);
+                    } else {
+                        param = GPIO_CFG_PARAM(i, GMODE_INPUT_PULLUP);
+                    }
+
                     sddev_control(GPIO_DEV_NAME, CMD_GPIO_CFG, &param);
                     if(0x1 != (UINT32)gpio_ctrl( CMD_GPIO_INPUT, &i))
                     {   /*check gpio really input value,to correct wrong edge setting*/
@@ -2071,7 +2101,13 @@ void sctrl_enter_rtos_deep_sleep(PS_DEEP_CTRL_PARAM *deep_param)
                 }
                 else
                 {
-                    param = GPIO_CFG_PARAM(i, GMODE_INPUT_PULLDOWN);
+                    if(sctrl_get_deep_sleep_gpio_floating_map() & (0x01UL << i))
+                    {
+                        param = GPIO_CFG_PARAM(i, GMODE_INPUT);
+                    } else {
+                        param = GPIO_CFG_PARAM(i, GMODE_INPUT_PULLDOWN);
+                    }
+
                     sddev_control(GPIO_DEV_NAME, CMD_GPIO_CFG, &param);
                     if(0x0 != (UINT32)gpio_ctrl( CMD_GPIO_INPUT, &i))
                     {   /*check gpio really input value,to correct wrong edge setting*/
@@ -2089,7 +2125,13 @@ void sctrl_enter_rtos_deep_sleep(PS_DEEP_CTRL_PARAM *deep_param)
             {
                 if( deep_param->gpio_last_edge_map  & (0x01UL << i))
                 {
-                    param = GPIO_CFG_PARAM(i + BITS_INT, GMODE_INPUT_PULLUP);
+                    if(sctrl_get_deep_sleep_gpio_floating_map() & (0x01UL << i))
+                    {
+                        param = GPIO_CFG_PARAM(i + BITS_INT, GMODE_INPUT);
+                    } else {
+                        param = GPIO_CFG_PARAM(i + BITS_INT, GMODE_INPUT_PULLUP);
+                    }
+
                     sddev_control(GPIO_DEV_NAME, CMD_GPIO_CFG, &param);
                     reg = i + BITS_INT;
                     if(0x1 != (UINT32)gpio_ctrl( CMD_GPIO_INPUT, &reg))
@@ -2101,7 +2143,13 @@ void sctrl_enter_rtos_deep_sleep(PS_DEEP_CTRL_PARAM *deep_param)
                 }
                 else
                 {
-                    param = GPIO_CFG_PARAM(i + BITS_INT, GMODE_INPUT_PULLDOWN);
+                    if(sctrl_get_deep_sleep_gpio_floating_map() & (0x01UL << i))
+                    {
+                        param = GPIO_CFG_PARAM(i + BITS_INT, GMODE_INPUT);
+                    } else {
+                        param = GPIO_CFG_PARAM(i + BITS_INT, GMODE_INPUT_PULLDOWN);
+                    }
+
                     sddev_control(GPIO_DEV_NAME, CMD_GPIO_CFG, &param);
                     reg = i + BITS_INT;
                     if(0x0 != (UINT32)gpio_ctrl( CMD_GPIO_INPUT, &reg))
@@ -2132,7 +2180,7 @@ void sctrl_enter_rtos_deep_sleep(PS_DEEP_CTRL_PARAM *deep_param)
         reg = deep_param->gpio_last_index_map;
         REG_WRITE(SCTRL_GPIO_WAKEUP_EN1,reg);
     }
-#elif ((CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236))
+#elif ((CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236))
     if(( deep_param->wake_up_way & PS_DEEP_WAKEUP_GPIO ))
     {
         for ( i = 0; i < BITS_INT; i++ )
@@ -2152,35 +2200,49 @@ void sctrl_enter_rtos_deep_sleep(PS_DEEP_CTRL_PARAM *deep_param)
                 continue;
             }
 
-            if ( deep_param->gpio_index_map & ( 0x01UL << i ))
-            {
-                int type_h,type_l;
-                type_l = deep_param->gpio_edge_map;
-                type_h = 0x0;
+			if ( deep_param->gpio_index_map & ( 0x01UL << i ))
+			{
+				int type_h,type_l;
+				type_l = deep_param->gpio_edge_map;
+				type_h = 0x0;
 
-                /* low level or negedge wakeup */
-                if(( type_h & ( 0x01UL << i )) == ( type_l & ( 0x01UL << i )))
-                {
-                    param = GPIO_CFG_PARAM(i, GMODE_INPUT_PULLUP);
-                    sddev_control(GPIO_DEV_NAME, CMD_GPIO_CFG, &param);
-                }
-                else    /* high level or posedge wakeup */
-                {
-                    param = GPIO_CFG_PARAM(i, GMODE_INPUT_PULLDOWN);
-                    sddev_control(GPIO_DEV_NAME, CMD_GPIO_CFG, &param);
-                }
+				/* low level or negedge wakeup */
+				if(( type_h & ( 0x01UL << i )) == ( type_l & ( 0x01UL << i )))
+				{
+					if(sctrl_get_deep_sleep_gpio_floating_map() & (0x01UL << i))
+					{
+						param = GPIO_CFG_PARAM(i, GMODE_INPUT);
+					} else {
+						param = GPIO_CFG_PARAM(i, GMODE_INPUT_PULLUP);
+					}
 
-                REG_WRITE(SCTRL_GPIO_WAKEUP_TYPE, type_l);
-                REG_WRITE(SCTRL_GPIO_WAKEUP_TYPE_SELECT, type_h);
-            }
+					sddev_control(GPIO_DEV_NAME, CMD_GPIO_CFG, &param);
+				}
+				else    /* high level or posedge wakeup */
+				{
+					if(sctrl_get_deep_sleep_gpio_floating_map() & (0x01UL << i))
+					{
+						param = GPIO_CFG_PARAM(i, GMODE_INPUT);
+					} else {
+						param = GPIO_CFG_PARAM(i, GMODE_INPUT_PULLDOWN);
+					}
+
+					sddev_control(GPIO_DEV_NAME, CMD_GPIO_CFG, &param);
+				}
+
+				REG_WRITE(SCTRL_GPIO_WAKEUP_TYPE, type_l);
+				REG_WRITE(SCTRL_GPIO_WAKEUP_TYPE_SELECT, type_h);
+			}
         }
 
         reg = deep_param->gpio_index_map;
         REG_WRITE(SCTRL_GPIO_WAKEUP_EN,reg);
     }
 #endif
+        delay(11);//106.4us ,at least 100us
+        REG_WRITE(SCTRL_GPIO_WAKEUP_INT_STATUS,0xFFFFFFFF);
 
-#if (CFG_SOC_NAME != SOC_BK7231N)
+#if (CFG_SOC_NAME != SOC_BL2028N)
     REG_WRITE(SCTRL_USB_PLUG_WAKEUP,USB_PLUG_IN_INT_BIT|USB_PLUG_OUT_INT_BIT);
     if(deep_param->wake_up_way & PS_DEEP_WAKEUP_USB)
     {
@@ -2219,22 +2281,22 @@ void sctrl_enter_rtos_deep_sleep(PS_DEEP_CTRL_PARAM *deep_param)
 int bk_misc_wakeup_get_gpio_num(void)
 {
 	uint32_t gpio_0_31_status = 0;
-	#if (CFG_SOC_NAME != SOC_BK7231N) && (CFG_SOC_NAME != SOC_BK7236)
+	#if (CFG_SOC_NAME != SOC_BL2028N) && (CFG_SOC_NAME != SOC_BK7236)
 	uint32_t gpio_32_39_status = 0;
 	#endif
 	int wakeup_gpio_num = -1;
 
 	gpio_0_31_status = REG_READ(SCTRL_GPIO_WAKEUP_INT_STATUS);
-	#if (CFG_SOC_NAME != SOC_BK7231N) && (CFG_SOC_NAME != SOC_BK7236)
+	#if (CFG_SOC_NAME != SOC_BL2028N) && (CFG_SOC_NAME != SOC_BK7236)
 	gpio_32_39_status = REG_READ(SCTRL_GPIO_WAKEUP_INT_STATUS1);
 	#endif
 	REG_WRITE(SCTRL_GPIO_WAKEUP_INT_STATUS, gpio_0_31_status);//clear status
-	#if (CFG_SOC_NAME != SOC_BK7231N) && (CFG_SOC_NAME != SOC_BK7236)
+	#if (CFG_SOC_NAME != SOC_BL2028N) && (CFG_SOC_NAME != SOC_BK7236)
 	REG_WRITE(SCTRL_GPIO_WAKEUP_INT_STATUS1, gpio_32_39_status);//clear status
 	#endif
 
 	if((0 == gpio_0_31_status)
-	#if (CFG_SOC_NAME != SOC_BK7231N) && (CFG_SOC_NAME != SOC_BK7236)
+	#if (CFG_SOC_NAME != SOC_BL2028N) && (CFG_SOC_NAME != SOC_BK7236)
 	&& (0 == gpio_32_39_status)
 	#endif
 	)
@@ -2256,7 +2318,7 @@ int bk_misc_wakeup_get_gpio_num(void)
 			gpio_0_31_status = gpio_0_31_status >> 1;
 		}
 	}
-	#if (CFG_SOC_NAME != SOC_BK7231N) && (CFG_SOC_NAME != SOC_BK7236)
+	#if (CFG_SOC_NAME != SOC_BL2028N) && (CFG_SOC_NAME != SOC_BK7236)
 	else if(gpio_32_39_status)
 	{
 		for(int i=32;i<40;i++)
@@ -2284,14 +2346,14 @@ RESET_SOURCE_STATUS sctrl_get_deep_sleep_wake_soure(void)
         waked_source = RESET_SOURCE_DEEPPS_RTC;
     }
     else if(REG_READ(SCTRL_GPIO_WAKEUP_INT_STATUS)
-#if (CFG_SOC_NAME != SOC_BK7231N)
+#if (CFG_SOC_NAME != SOC_BL2028N)
     || REG_READ(SCTRL_GPIO_WAKEUP_INT_STATUS1)
 #endif
     )
     {
         waked_source = RESET_SOURCE_DEEPPS_GPIO;
     }
-#if (CFG_SOC_NAME != SOC_BK7231N)
+#if (CFG_SOC_NAME != SOC_BL2028N)
     else if(REG_READ(SCTRL_USB_PLUG_WAKEUP) & (USB_PLUG_IN_INT_BIT | USB_PLUG_OUT_INT_BIT))
     {
         waked_source = RESET_SOURCE_DEEPPS_USB;
@@ -2299,6 +2361,16 @@ RESET_SOURCE_STATUS sctrl_get_deep_sleep_wake_soure(void)
 #endif
 
     return waked_source;
+}
+
+void sctrl_set_deep_sleep_gpio_floating_map(UINT32 gpio_last_floating_map)
+{
+	deep_sleep_gpio_floating_map = gpio_last_floating_map;
+}
+
+UINT32 sctrl_get_deep_sleep_gpio_floating_map(void)
+{
+	 return deep_sleep_gpio_floating_map;
 }
 
 
@@ -3096,7 +3168,7 @@ UINT32 sctrl_ctrl(UINT32 cmd, void *param)
         }
         break;
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 	case CMD_BLE_RF_PTA_EN:
         reg = REG_READ(SCTRL_CONTROL);
         reg |= (BLE_RF_PTA_EN_BIT);
@@ -3122,7 +3194,7 @@ UINT32 sctrl_ctrl(UINT32 cmd, void *param)
         ret = sctrl_read_efuse(param);
         break;
 
-#if (CFG_SOC_NAME != SOC_BK7231N)
+#if (CFG_SOC_NAME != SOC_BL2028N)
     case CMD_QSPI_VDDRAM_VOLTAGE:
         reg = REG_READ(SCTRL_CONTROL);
         reg &= ~(PSRAM_VDDPAD_VOLT_MASK << PSRAM_VDDPAD_VOLT_POSI);
@@ -3381,7 +3453,7 @@ UINT32 sctrl_ctrl(UINT32 cmd, void *param)
         REG_WRITE(SCTRL_LOW_PWR_CLK, reg);
         break;
     case CMD_SCTRL_SET_GADC_SEL:
-        #if (CFG_SOC_NAME == SOC_BK7231N)
+        #if (CFG_SOC_NAME == SOC_BL2028N)
         reg = sctrl_analog_get(SCTRL_ANALOG_CTRL4);
         reg &= ~(GADC_CAL_SEL_MASK << GADC_CAL_SEL_POSI);
         reg |= (((*(UINT32 *)param) & GADC_CAL_SEL_MASK) << GADC_CAL_SEL_POSI);
@@ -3433,4 +3505,44 @@ UINT32 sctrl_ctrl(UINT32 cmd, void *param)
     return ret;
 }
 
+#if CFG_IPERF_TEST_ACCEL && (CFG_SOC_NAME == SOC_BL2028N)
+extern void flash_set_clk(UINT8 clk_conf);
+void sctrl_overclock(int enable)
+{
+    UINT32 param;
+
+    GLOBAL_INT_DECLARATION();
+    if (enable) {
+	param = REG_READ(SCTRL_CONTROL);
+	param &= ~(MCLK_DIV_MASK << MCLK_DIV_POSI);
+	param |= ((MCLK_DIV_2 & MCLK_DIV_MASK) << MCLK_DIV_POSI);
+	GLOBAL_INT_DISABLE();
+	REG_WRITE(SCTRL_CONTROL, param);
+	flash_set_clk(4);
+    }
+    else {
+	/*config main clk*/
+#if !USE_DCO_CLK_POWON
+	param = REG_READ(SCTRL_CONTROL);
+	param &= ~(MCLK_DIV_MASK << MCLK_DIV_POSI);
+#if CFG_SYS_REDUCE_NORMAL_POWER
+	param |= ((MCLK_DIV_7 & MCLK_DIV_MASK) << MCLK_DIV_POSI);
+#else
+	param |= ((MCLK_DIV_5 & MCLK_DIV_MASK) << MCLK_DIV_POSI);
+#endif // CFG_SYS_REDUCE_NORMAL_POWER
+	GLOBAL_INT_DISABLE();
+	REG_WRITE(SCTRL_CONTROL, param);
+#else
+	GLOBAL_INT_DISABLE();
+#endif /*(!USE_DCO_CLK_POWON)*/
+
+#if CFG_USE_STA_PS
+	flash_set_clk(9);
+#else
+	flash_set_clk(5);
+#endif
+    }
+    GLOBAL_INT_RESTORE();
+}
+#endif
 // EOF

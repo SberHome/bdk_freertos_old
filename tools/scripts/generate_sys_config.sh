@@ -28,8 +28,8 @@ case $1 in
 	bk7231u)
 		new_sys_config=beken378/app/config/sys_config_bk7231u.h
 		;;
-	bk7231n)
-		new_sys_config=beken378/app/config/sys_config_bk7231n.h
+	bl2028n)
+		new_sys_config=beken378/app/config/sys_config_bl2028n.h
 		;;
 	bk7251)
 		new_sys_config=beken378/app/config/sys_config_bk7251.h

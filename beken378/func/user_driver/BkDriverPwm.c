@@ -33,7 +33,7 @@
 #include "pwm_pub.h"
 
 
-#if (CFG_SOC_NAME != SOC_BK7231N) && (CFG_SOC_NAME != SOC_BK7236)
+#if (CFG_SOC_NAME != SOC_BL2028N) && (CFG_SOC_NAME != SOC_BK7236)
 #include "pwm_bk7271.h"
 
 OSStatus bk_pwm_initialize(bk_pwm_t pwm, uint32_t frequency, uint32_t duty_cycle)
@@ -107,7 +107,7 @@ bk_err_t bk_pwm_update_param(bk_pwm_t pwm, uint32_t frequency, uint32_t duty_cyc
 
 #else
 
-#include "pwm_bk7231n.h"
+#include "pwm_bl2028n.h"
 OSStatus bk_pwm_initlevl_set_low(bk_pwm_t pwm);
 OSStatus bk_pwm_initlevl_set_high(bk_pwm_t pwm);
 
@@ -213,7 +213,7 @@ UINT32 bk_pwm_get_capvalue(bk_pwm_t pwm)
 	return pwm_cap.value;
 }
 
-#if (CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236)
+#if (CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236)
 static UINT8 group_flag = 0;
 static UINT8 pwm1_set_high_flag = 0;
 static UINT8 pwm2_set_low_flag = 0;

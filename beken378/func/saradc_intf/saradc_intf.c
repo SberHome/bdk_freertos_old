@@ -265,7 +265,7 @@ TADC_ENTITY_T *tadc_entity_init(void)
     return adc_entity;
 }
 
-#if (CFG_SOC_NAME != SOC_BK7231) && (CFG_SOC_NAME != SOC_BK7231N) && (CFG_SOC_NAME != SOC_BK7236)
+#if (CFG_SOC_NAME != SOC_BK7231) && (CFG_SOC_NAME != SOC_BL2028N) && (CFG_SOC_NAME != SOC_BK7236)
 /*
 vol:	PSRAM_VDD_1_8V
 		PSRAM_VDD_2_5V
@@ -597,7 +597,7 @@ static void adc_check(int argc, char **argv)
         {
         UINT32 sum = 0, sum1, sum2;
         UINT16 *pData = p_ADC_drv_desc->pData;
-#if (CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236)
+#if (CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236)
         sum1 = pData[6] + pData[7];
         sum2 = pData[8] + pData[9];
 #else
@@ -610,7 +610,7 @@ static void adc_check(int argc, char **argv)
         p_ADC_drv_desc->pData[0] = sum;
         }
 
-#if (CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236)
+#if (CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236)
         os_printf("saradc[ch%d]=%d\r\n", (UINT32)p_ADC_drv_desc->channel, (UINT32)p_ADC_drv_desc->pData[0]);
 #else
         voltage = saradc_calculate(p_ADC_drv_desc->pData[0]);

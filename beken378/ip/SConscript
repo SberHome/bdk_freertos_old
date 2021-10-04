@@ -112,8 +112,8 @@ platform_match = 'yes'
 
 if (GetLocalDepend(options, 'CFG_SOC_NAME') == 'SOC_BK7231U'):
     wifi_lib_name += '_7231u'
-elif (GetLocalDepend(options, 'CFG_SOC_NAME') == 'SOC_BK7231N'):
-    wifi_lib_name += '_7231n'
+elif (GetLocalDepend(options, 'CFG_SOC_NAME') == 'SOC_BL2028N'):
+    wifi_lib_name += '_2028n'
 elif (GetLocalDepend(options, 'CFG_SOC_NAME') == 'SOC_BK7221U'):
     wifi_lib_name += '_7251'
 elif (GetLocalDepend(options, 'CFG_SOC_NAME') == 'SOC_BK7271'):

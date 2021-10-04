@@ -34,6 +34,9 @@
 #include "wdt_pub.h"
 #include "start_type_pub.h"
 #include "wpa_psk_cache.h"
+#include "drv_model_pub.h"
+#include "str_pub.h"
+
 #if CFG_WPA_CTRL_IFACE
 #include "wlan_defs_pub.h"
 #include "wpa_ctrl.h"
@@ -386,7 +389,7 @@ void bk_reboot(void)
 
     sddev_control(WDT_DEV_NAME, WCMD_POWER_DOWN, NULL);
     os_printf("wdt reboot\r\n");
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     delay_ms(100); //add delay for bk_writer BEKEN_DO_REBOOT cmd
 #endif
     sddev_control(WDT_DEV_NAME, WCMD_SET_PERIOD, &wdt_val);
@@ -640,7 +643,7 @@ void wlan_read_fast_connect_info(struct wlan_fast_connect_info *fci)
 	uint32_t status, addr;
 	DD_HANDLE flash_hdl;
 
-	flash_hdl = ddev_open(FLASH_DEV_NAME, &status, 0);
+	flash_hdl = ddev_open(FLASH_DEV_NAME, (UINT32*)&status, 0);
 	addr = BSSID_INFO_ADDR;
 	ddev_read(flash_hdl, (char *)fci, sizeof(*fci), addr);
 	ddev_close(flash_hdl);
@@ -661,7 +664,7 @@ void wlan_write_fast_connect_info(struct wlan_fast_connect_info *fci)
 		goto wr_exit;
 
 	/* write flash and save the information about fast connection*/
-	flash_hdl = ddev_open(FLASH_DEV_NAME, &status, 0);
+	flash_hdl = ddev_open(FLASH_DEV_NAME, (UINT32*)&status, 0);
 
 	ddev_control(flash_hdl, CMD_FLASH_GET_PROTECT, &protect_flag);
 	protect_param = FLASH_PROTECT_NONE;
@@ -670,7 +673,7 @@ void wlan_write_fast_connect_info(struct wlan_fast_connect_info *fci)
 	addr = BSSID_INFO_ADDR;
 	ddev_control(flash_hdl, CMD_FLASH_ERASE_SECTOR, (void *)&addr);
 
-	ddev_write(flash_hdl, fci, sizeof(*fci), addr);
+	ddev_write(flash_hdl, (char*)fci, sizeof(*fci), addr);
 
 	ddev_control(flash_hdl, CMD_FLASH_SET_PROTECT, (void *)&protect_flag);
 	ddev_close(flash_hdl);
@@ -712,7 +715,7 @@ OSStatus bk_wlan_start_sta(network_InitTypeDef_st *inNetworkInitPara)
     wifi_station_status_event_notice(0,RW_EVT_STA_CONNECTING);
 #endif
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 	if (get_ate_mode_state()) {
 		// cunliang20210407 set blk_standby_cfg with blk_txen_cfg like txevm, qunshan confirmed
 		rwnx_cal_en_extra_txpa();
@@ -723,7 +726,7 @@ OSStatus bk_wlan_start_sta(network_InitTypeDef_st *inNetworkInitPara)
 #if CFG_WPA_CTRL_IFACE && CFG_WLAN_FAST_CONNECT
 	wlan_read_fast_connect_info(&fci);
 
-	ssid_len = os_strlen(fci.ssid);
+	ssid_len = os_strlen((char*)fci.ssid);
 	if(ssid_len > SSID_MAX_LEN)
 		ssid_len = SSID_MAX_LEN;
 
@@ -741,7 +744,7 @@ OSStatus bk_wlan_start_sta(network_InitTypeDef_st *inNetworkInitPara)
 
 	if (ssid_len == req_ssid_len &&
 		os_memcmp(inNetworkInitPara->wifi_ssid, fci.ssid, ssid_len) == 0 &&
-		os_strcmp(inNetworkInitPara->wifi_key, fci.pwd) == 0) {
+		os_strcmp(inNetworkInitPara->wifi_key, (char*)fci.pwd) == 0) {
 		chan = fci.channel;
 		psk = fci.psk;
 		psk_len = PMK_LEN * 2;
@@ -751,7 +754,7 @@ OSStatus bk_wlan_start_sta(network_InitTypeDef_st *inNetworkInitPara)
 		bk_printf("  chan: %d\n", chan);
 		bk_printf("  PMK: %s\n", psk);
 #endif
-		if (os_strlen(psk) == 0) {
+		if (os_strlen((char*)psk) == 0) {
 			// no psk info, calcuate pmk
 			psk = 0;
 			psk_len = 0;
@@ -1122,7 +1125,7 @@ OSStatus bk_wlan_start_sta_adv(network_InitTypeDef_adv_st *inNetworkInitParaAdv)
 #else /* CFG_WPA_CTRL_IFACE */
 	wlan_sta_config_t config;
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 	if (get_ate_mode_state()) {
 		// cunliang20210407 set blk_standby_cfg with blk_txen_cfg like txevm, qunshan confirmed
 		rwnx_cal_en_extra_txpa();
@@ -1324,7 +1327,7 @@ int bk_wlan_stop(char mode)
         bk_wlan_dtim_rf_ps_disable_send_msg();
 #endif
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 		if (get_ate_mode_state()) {
 			// cunliang20210407 recover blk_standby_cfg like txevm -e 0, qunshan confirmed
 			rwnx_cal_dis_extra_txpa();
@@ -2049,62 +2052,6 @@ int bk_wlan_mcu_ps_get_enable_flag(void)
 	return mcu_ps_enabled;
 }
 #endif
-
-BK_PS_LEVEL global_ps_level = 0;
-int bk_wlan_power_save_set_level(BK_PS_LEVEL level)
-{
-    if(level & PS_DEEP_SLEEP_BIT)
-    {
-#if CFG_USE_STA_PS
-        if(global_ps_level & PS_RF_SLEEP_BIT)
-        {
-            bk_wlan_dtim_rf_ps_mode_disable();
-        }
-#endif
-#if CFG_USE_MCU_PS
-        if(global_ps_level & PS_MCU_SLEEP_BIT)
-        {
-            bk_wlan_mcu_ps_mode_disable();
-        }
-#endif
-        rtos_delay_milliseconds(100);
-#if CFG_USE_DEEP_PS
-        bk_enter_deep_sleep(0xc00, 0xc00, 0, 0, 5, 2, 0, 0);
-#endif
-    }
-
-    if((global_ps_level & PS_RF_SLEEP_BIT) ^ (level & PS_RF_SLEEP_BIT))
-    {
-#if CFG_USE_STA_PS
-        if(global_ps_level & PS_RF_SLEEP_BIT)
-        {
-            bk_wlan_dtim_rf_ps_mode_disable();
-        }
-        else
-        {
-            bk_wlan_dtim_rf_ps_mode_enable();
-        }
-#endif
-    }
-
-    if((global_ps_level & PS_MCU_SLEEP_BIT) ^ (level & PS_MCU_SLEEP_BIT))
-    {
-#if CFG_USE_MCU_PS
-        if(global_ps_level & PS_MCU_SLEEP_BIT)
-        {
-            bk_wlan_mcu_ps_mode_disable();
-        }
-        else
-        {
-            bk_wlan_mcu_ps_mode_enable();
-        }
-#endif
-    }
-
-    global_ps_level = level;
-
-    return 0;
-}
 
 void bk_wlan_status_register_cb(FUNC_1PARAM_PTR cb)
 {

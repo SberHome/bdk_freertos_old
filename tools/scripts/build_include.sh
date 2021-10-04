@@ -5,7 +5,7 @@ modify_config()
 	sed -i 's/\(\s*#define\s*\)\<'$2'\>\(\s*\)\([0-9]*\)/\1'$2'\2'$3'/g' $1
 }
 
-SUPPORTED_BUILD_PLATFORMS="bk7231n bk7231u bk7251"
+SUPPORTED_BUILD_PLATFORMS="bl2028n bk7231u bk7251"
 
 validate_platform()
 {

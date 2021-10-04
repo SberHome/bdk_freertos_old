@@ -5,8 +5,8 @@
 #include "bk7231_cal.h"
 #elif (CFG_SOC_NAME == SOC_BK7231U)
 #include "bk7231U_cal.h"
-#elif (CFG_SOC_NAME == SOC_BK7231N)
-#include "bk7231N_cal.h"
+#elif (CFG_SOC_NAME == SOC_BL2028N)
+#include "bl2028n_cal.h"
 #elif (CFG_SOC_NAME == SOC_BK7221U)
 #include "bk7221U_cal.h"
 #endif

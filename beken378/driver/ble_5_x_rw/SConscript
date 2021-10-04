@@ -12,8 +12,8 @@ options = LocalOptions(sys_config)
 ble_lib_name = 'ble'
 platform_match = 'yes'
 
-if (GetLocalDepend(options, 'CFG_SOC_NAME') == 'SOC_BK7231N'):
-    ble_lib_name += '_7231n'
+if (GetLocalDepend(options, 'CFG_SOC_NAME') == 'SOC_BL2028N'):
+    ble_lib_name += '_2028n'
 elif (GetLocalDepend(options, 'CFG_SOC_NAME') == 'SOC_BK7236'):
     ble_lib_name += '_7236'
 else:
@@ -150,12 +150,12 @@ if ((GetLocalDepend(options, 'CFG_SUPPORT_BLE') == 1)
     src_pub += ["ble_pub/app/src/app_ble_init.c"]
     src_pub += ["ble_pub/app/src/app_sdp.c"]
     src_pub += ["ble_pub/ui/ble_ui.c"]
-    src_pub += ["platform/7231n/rwip/src/rwip.c"]
-    src_pub += ["platform/7231n/rwip/src/rwble.c"]
-    src_pub += ["platform/7231n/entry/ble_main.c"]
-    src_pub += ["platform/7231n/driver/rf/rf_xvr.c"]
-    src_pub += ["platform/7231n/driver/rf/ble_rf_port.c"]
-    src_pub += ["platform/7231n/driver/uart/uart_ble.c"]
+    src_pub += ["platform/2028n/rwip/src/rwip.c"]
+    src_pub += ["platform/2028n/rwip/src/rwble.c"]
+    src_pub += ["platform/2028n/entry/ble_main.c"]
+    src_pub += ["platform/2028n/driver/rf/rf_xvr.c"]
+    src_pub += ["platform/2028n/driver/rf/ble_rf_port.c"]
+    src_pub += ["platform/2028n/driver/uart/uart_ble.c"]
 
     path += [cwd + '/ble_lib/ip/ble/hl/api']
     path += [cwd + '/ble_lib/ip/ble/hl/inc']
@@ -190,14 +190,14 @@ if ((GetLocalDepend(options, 'CFG_SUPPORT_BLE') == 1)
     path += [cwd + '/ble_lib/modules/ke/api']
     path += [cwd + '/ble_lib/modules/ke/src']
     path += [cwd + '/ble_pub/prf']
-    path += [cwd + '/platform/7231n/rwip/api']
-    path += [cwd + '/platform/7231n/rwip/import/reg']
-    path += [cwd + '/platform/7231n/nvds/api']
-    path += [cwd + '/platform/7231n/config']
-    path += [cwd + '/platform/7231n/driver/reg']
-    path += [cwd + '/platform/7231n/driver/rf']
-    path += [cwd + '/platform/7231n/driver/uart']
-    path += [cwd + '/platform/7231n/entry']
+    path += [cwd + '/platform/2028n/rwip/api']
+    path += [cwd + '/platform/2028n/rwip/import/reg']
+    path += [cwd + '/platform/2028n/nvds/api']
+    path += [cwd + '/platform/2028n/config']
+    path += [cwd + '/platform/2028n/driver/reg']
+    path += [cwd + '/platform/2028n/driver/rf']
+    path += [cwd + '/platform/2028n/driver/uart']
+    path += [cwd + '/platform/2028n/entry']
     path += [cwd + '/arch/armv5']
     path += [cwd + '/arch/armv5/ll']
     path += [cwd + '/arch/armv5/compiler']

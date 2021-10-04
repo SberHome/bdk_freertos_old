@@ -5,9 +5,6 @@ $(NAME)_TYPE := kernel
 -include $(SOURCE_ROOT)/platform/mcu/$(HOST_MCU_FAMILY)/.config
 
 WPA_VERSION := wpa_supplicant_2_9
-ifeq ($(CFG_USE_WPA_29),0)
-WPA_VERSION := hostapd-2.5
-endif
 
 $(NAME)_INCLUDES := app/standalone-ap \
 					app/standalone-station \
@@ -30,6 +27,7 @@ $(NAME)_INCLUDES := app/standalone-ap \
 					driver/i2c \
 					driver/jpeg \
 					driver/calendar \
+					driver/pwm \
 					func/sdio_intf \
 					func/power_save \
 					func/temp_detect \
@@ -42,6 +40,7 @@ $(NAME)_INCLUDES := app/standalone-ap \
 					func/camera_intf \
 					func/video_transfer \
 					func/user_driver \
+					func/force_sleep \
 					func/ble_wifi_exchange
 
 $(NAME)_INCLUDES += ip/ke \
@@ -103,8 +102,9 @@ $(NAME)_SOURCES :=  app/app.c \
 					driver/macphy_bypass/mac_phy_bypass.c \
 					driver/phy/phy_trident.c \
 					driver/pwm/pwm.c \
-					driver/pwm/pwm_bk7231n.c \
+					driver/pwm/pwm_bl2028n.c \
 					driver/pwm/bk_timer.c \
+					driver/pwm/bk_timer_extense.c \
 					driver/pwm/mcu_ps_timer.c \
 					driver/saradc/saradc.c \
 					driver/sdio/sdio.c \
@@ -144,6 +144,8 @@ $(NAME)_SOURCES :=  app/app.c \
 					func/lwip_intf/dhcpd/dhcp-server.c \
 					func/camera_intf/camera_intf.c \
 					func/video_transfer/video_transfer.c \
+					func/force_sleep/force_mac_ps.c \
+					func/force_sleep/force_mcu_ps.c \
 					func/ble_wifi_exchange/ble_wifi_port.c
 
 ifeq ($(CFG_SOC_NAME), 2)
@@ -152,9 +154,9 @@ $(NAME)_SOURCES +=  driver/spi/spi.c \
 					driver/spi/spi_slave.c
 endif
 ifeq ($(CFG_SOC_NAME), 5)
-$(NAME)_SOURCES +=  driver/spi/spi_bk7231n.c \
-					driver/spi/spi_master_bk7231n.c \
-					driver/spi/spi_slave_bk7231n.c
+$(NAME)_SOURCES +=  driver/spi/spi_bl2028n.c \
+					driver/spi/spi_master_bl2028n.c \
+					driver/spi/spi_slave_bl2028n.c
 endif
 
 

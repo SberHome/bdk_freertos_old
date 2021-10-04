@@ -316,8 +316,10 @@ int hapd_intf_add_key(struct prism2_hostapd_param *param, int len)
 
     ps_set_key_prevent();
     mcu_prevent_set(MCU_PS_ADD_KEY);
-    UINT32 reg = RF_HOLD_BY_KEY_BIT;
-    sddev_control(SCTRL_DEV_NAME, CMD_RF_HOLD_BIT_SET, &reg);
+    if (key_param.sta_idx != 0xFF) {
+        UINT32 reg = RF_HOLD_BY_KEY_BIT;
+        sddev_control(SCTRL_DEV_NAME, CMD_RF_HOLD_BIT_SET, &reg);
+    }
 #if CFG_USE_STA_PS
     power_save_rf_dtim_manual_do_wakeup();
 #endif

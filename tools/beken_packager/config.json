@@ -4,7 +4,7 @@
     "count": 2,
     "section": [
         {
-            "firmware": "bootloader_bk7231n_uart2_v1.0.6.bin",
+            "firmware": "bootloader_bl2028n_uart2_v1.0.6.bin",
             "version": "2M.1220",
             "partition": "bootloader",
             "start_addr": "0x00000000",

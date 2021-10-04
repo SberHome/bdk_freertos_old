@@ -20,7 +20,7 @@
 #define ADC_TEMP_SENSER_CHANNEL                     7
 #endif
 
-#if (CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236)
+#if (CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236)
 #define ADC_TEMP_BUFFER_SIZE                        (5+5)//(+5 for skip)
 #else
 #define ADC_TEMP_BUFFER_SIZE                        5
@@ -34,7 +34,7 @@
 #define ADC_TMEP_DIST_INTIAL_VAL                    (0)
 #if (CFG_SOC_NAME == SOC_BK7231)
 #define ADC_TMEP_LSB_PER_10DEGREE                   (24)
-#elif (CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236)
+#elif (CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236)
 #define ADC_TMEP_LSB_PER_10DEGREE                   (20)
 #else
 #define ADC_TMEP_LSB_PER_10DEGREE                   (12)// 7231:24,7231U:22,

@@ -161,7 +161,7 @@ enum em_et_status
     #endif // BT_EMB_PRESENT/BLE_EMB_PRESENT
 #endif
 
-#define EM_FT_END            (EM_FT_OFFSET + (EM_RF_VCO_TABLE_LEN + EM_RF_FREQ_TABLE_LEN) * sizeof(uint8_t))
+#define EM_FT_END            (EM_FT_OFFSET + EM_RF_VCO_TABLE_LEN + EM_RF_FREQ_TABLE_LEN)
 
 /*
  * RF SW SPI
@@ -260,6 +260,10 @@ enum em_et_status
 #define EM_BT_END              (EM_BT_OFFSET)
 #endif //BT_EMB_PRESENT
 
+#define EM_SIZE                     0x4000
+#if (EM_BLE_END > EM_SIZE)
+    #error "BLE EM Out of 16K byte"
+#endif
 
 /*
  * RF SPI part

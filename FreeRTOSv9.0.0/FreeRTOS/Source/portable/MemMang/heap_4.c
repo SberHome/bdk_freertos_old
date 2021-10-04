@@ -770,7 +770,7 @@ void vPortInitialiseBlocks( void )
 extern unsigned char _empty_ram;
 
 #define HEAP_START_ADDRESS    (void*)&_empty_ram
-#if CFG_SOC_NAME == SOC_BK7231N
+#if CFG_SOC_NAME == SOC_BL2028N
 #define HEAP_END_ADDRESS      (void*)(0x00400000 + 192 * 1024)
 #else
 #define HEAP_END_ADDRESS      (void*)(0x00400000 + 256 * 1024)

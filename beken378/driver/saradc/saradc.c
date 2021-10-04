@@ -130,7 +130,7 @@ static void saradc_gpio_config(void)
 		break;
 	}
 
-#if ((SOC_BK7231U == CFG_SOC_NAME) || (SOC_BK7221U == CFG_SOC_NAME) || (SOC_BK7231N == CFG_SOC_NAME))
+#if ((SOC_BK7231U == CFG_SOC_NAME) || (SOC_BK7221U == CFG_SOC_NAME) || (SOC_BL2028N == CFG_SOC_NAME))
 	case 4: {
 		param = GFUNC_MODE_ADC4;
 		sddev_control(GPIO_DEV_NAME, CMD_GPIO_ENABLE_SECOND, &param);
@@ -228,7 +228,7 @@ static UINT32 saradc_open(UINT32 op_flag)
         | ((saradc_desc->filter & SARADC_ADC_FILTER_MASK)<< SARADC_ADC_FILTER_POSI);
     REG_WRITE(SARADC_ADC_CONFIG, config_value);
 
-#if (CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236)
+#if (CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236)
     if (8 == saradc_desc->channel)
     {
         sat_config_value = SARADC_ADC_SAT_ENABLE
@@ -579,7 +579,7 @@ UINT32 saradc_check_accuracy(void)
 static UINT32 saradc_ctrl(UINT32 cmd, void *param)
 {
 	UINT32 ret = SARADC_SUCCESS;
-#if (CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236)
+#if (CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236)
 	UINT32 value;
 #endif
 
@@ -619,7 +619,7 @@ static UINT32 saradc_ctrl(UINT32 cmd, void *param)
     case SARADC_CMD_RESUME:
         ret = saradc_resume();
         break;
-#if (CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236)
+#if (CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236)
     case SARADC_CMD_SET_BYPASS_CALIB:
         value = REG_READ(SARADC_ADC_CTRL_CFG);
         if (*(UINT32 *)param)
@@ -667,7 +667,7 @@ void saradc_isr(void)
 
             if(saradc_desc->current_sample_data_cnt == saradc_desc->data_buff_size)
             {
-#if (CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236)
+#if (CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236)
                 saradc_pause();
 #else
                 saradc_close();

@@ -922,6 +922,11 @@ beken_time_t rtos_get_time( void )
     return (beken_time_t) ( xTaskGetTickCount() * ms_to_tick_ratio );
 }
 
+uint64_t rtos_get_time_us( void )
+{
+    return (uint64_t)cal_get_time_us();
+}
+
 /**
  * Delay for a number of milliseconds
  *

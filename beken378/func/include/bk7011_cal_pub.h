@@ -14,7 +14,7 @@ typedef enum{
 }TXSTRUCT;
 
 #define DEFAULT_TXID_ID           (12345678)
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 #define DEFAULT_TXID_THERMAL      (350)
 #else
 #define DEFAULT_TXID_THERMAL      (280) //180430,7231:315,7231U:340
@@ -86,7 +86,7 @@ typedef enum{
 #define CALI_STATUS_PASS        1
 #define CALI_STATUS_FAIL        0
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 typedef struct tmp_pwr_st {//do
     unsigned trx0x0c_12_15 : 4; //not used on BK7231N actually
     signed p_index_delta : 6;
@@ -206,7 +206,7 @@ extern void rwnx_cal_set_txpwr_for_ble_boardcast(void);
 extern void bk7011_set_rf_config_tssithred_b(int tssi_thred_b);
 extern void bk7011_set_rf_config_tssithred_g(int tssi_thred_g);
 extern void rwnx_cal_recover_txpwr_for_wifi(void);
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
 extern void rwnx_cal_recover_rf_setting(void);
 extern void rwnx_cal_recover_wifi_setting(void);
 #endif

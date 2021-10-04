@@ -767,7 +767,9 @@ typedef union
         volatile unsigned long dcoc_ctl         : 2;
         volatile unsigned long lpfvcmic10       : 2;
         volatile unsigned long lpftxTest        : 1;
-        volatile unsigned long NC               : 21;
+        volatile unsigned long NC1              : 2;
+        volatile unsigned long tx_filter_lev    : 1;
+        volatile unsigned long NC               : 18;
     } bits;
     volatile unsigned int value;
 } BK7011_TRxV2A_REG0x7_TypeDef;

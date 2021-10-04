@@ -61,7 +61,7 @@ static void flash_get_current_flash_config(void)
     }
 }
 
-static void flash_set_clk(UINT8 clk_conf)
+void flash_set_clk(UINT8 clk_conf)
 {
     UINT32 value;
 
@@ -147,7 +147,7 @@ static UINT16 flash_read_sr(UINT8 sr_width)
 static void flash_write_sr(UINT8 sr_width,  UINT16 val)
 {
     UINT32 value;
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     GLOBAL_INT_DECLARATION();
 
     GLOBAL_INT_DISABLE();
@@ -174,7 +174,7 @@ static void flash_write_sr(UINT8 sr_width,  UINT16 val)
     }
 
     while(REG_READ(REG_FLASH_OPERATE_SW) & BUSY_SW);
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     GLOBAL_INT_RESTORE();
 #endif
 }
@@ -444,7 +444,7 @@ static void flash_erase_sector(UINT32 address)
 {
     UINT32 value;
     UINT32 erase_addr = address & 0xFFF000;
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     GLOBAL_INT_DECLARATION();
 #endif
 
@@ -454,7 +454,7 @@ static void flash_erase_sector(UINT32 address)
         return;
     }
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     GLOBAL_INT_DISABLE();
 #endif
     while(REG_READ(REG_FLASH_OPERATE_SW) & BUSY_SW);
@@ -465,7 +465,7 @@ static void flash_erase_sector(UINT32 address)
              | (value & WP_VALUE));
     REG_WRITE(REG_FLASH_OPERATE_SW, value);
     while(REG_READ(REG_FLASH_OPERATE_SW) & BUSY_SW);
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     GLOBAL_INT_RESTORE();
 #endif
 }
@@ -490,7 +490,7 @@ static void flash_read_data(UINT8 *buffer, UINT32 address, UINT32 len)
     UINT32 addr = address & (~0x1F);
     UINT32 buf[8];
     UINT8 *pb = (UINT8 *)&buf[0];
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     GLOBAL_INT_DECLARATION();
 #endif
 
@@ -499,7 +499,7 @@ static void flash_read_data(UINT8 *buffer, UINT32 address, UINT32 len)
         return;
     }
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     GLOBAL_INT_DISABLE();
 #endif
     while(REG_READ(REG_FLASH_OPERATE_SW) & BUSY_SW);
@@ -530,7 +530,7 @@ static void flash_read_data(UINT8 *buffer, UINT32 address, UINT32 len)
             }
         }
     }
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     GLOBAL_INT_RESTORE();
 #endif
 }
@@ -541,7 +541,7 @@ static void flash_write_data(UINT8 *buffer, UINT32 address, UINT32 len)
     UINT32 addr = address & (~0x1F);
     UINT32 buf[8];
     UINT8 *pb = (UINT8 *)&buf[0];
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
     GLOBAL_INT_DECLARATION();
 #endif
 
@@ -579,7 +579,7 @@ static void flash_write_data(UINT8 *buffer, UINT32 address, UINT32 len)
                 break;
         }
 
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
         GLOBAL_INT_DISABLE();
 #endif
         for (i = 0; i < 8; i++)
@@ -594,7 +594,7 @@ static void flash_write_data(UINT8 *buffer, UINT32 address, UINT32 len)
                      | (reg_value & WP_VALUE));
         REG_WRITE(REG_FLASH_OPERATE_SW, reg_value);
         while(REG_READ(REG_FLASH_OPERATE_SW) & BUSY_SW);
-#if (CFG_SOC_NAME == SOC_BK7231N)
+#if (CFG_SOC_NAME == SOC_BL2028N)
         GLOBAL_INT_RESTORE();
 #endif
         addr += 32;

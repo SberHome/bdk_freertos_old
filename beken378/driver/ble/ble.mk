@@ -5,9 +5,6 @@ $(NAME)_TYPE := kernel
 -include $(SOURCE_ROOT)/platform/mcu/$(HOST_MCU_FAMILY)/.config
 
 WPA_VERSION := wpa_supplicant-2.9
-ifeq ($(CFG_USE_WPA_29),0)
-WPA_VERSION := hostapd-2.5
-endif
 
 $(NAME)_INCLUDES := ../../app/standalone-ap \
 					../../app/standalone-station \

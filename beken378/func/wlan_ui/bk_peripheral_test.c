@@ -25,7 +25,7 @@
 #define BK_LOGD( tag, format, ... ) os_printf(format, ##__VA_ARGS__)
 #define BK_LOGV( tag, format, ... ) os_printf(format, ##__VA_ARGS__)
 
-#define CFG_LOG_LEVEL			BK_LOG_DEBUG
+#define CFG_LOG_LEVEL			BK_LOG_NONE
 
 #define PERI_LOGI				BK_LOGI
 #define PERI_LOGW				BK_LOGW
@@ -551,7 +551,7 @@ static void pwm_Command(char *pcWriteBuffer, int xWriteBufferLen, int argc, char
 {
 	UINT8 channel1;
 	UINT32 duty_cycle1, cycle, cap_value;
-#if (CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236)
+#if (CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236)
 	UINT8 channel2;
 	UINT32 duty_cycle2;
 	UINT32 dead_band;
@@ -561,7 +561,7 @@ static void pwm_Command(char *pcWriteBuffer, int xWriteBufferLen, int argc, char
 	channel1	= atoi(argv[2]);
 	duty_cycle1	= atoi(argv[3]);
 	cycle		= atoi(argv[4]);
-#if (CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236)
+#if (CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236)
 	channel2	= atoi(argv[5]);
 	duty_cycle2	= atoi(argv[6]);
 	dead_band	= atoi(argv[7]);
@@ -585,7 +585,7 @@ static void pwm_Command(char *pcWriteBuffer, int xWriteBufferLen, int argc, char
 		bk_pwm_start(channel1);				/*start single pwm channel once */
 	} else if (os_strcmp(argv[1], "stop") == 0)
 		bk_pwm_stop(channel1);
-#if ((CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236) ||(CFG_SOC_NAME == SOC_BK7271))
+#if ((CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236) ||(CFG_SOC_NAME == SOC_BK7271))
 	else if (os_strcmp(argv[1], "update") == 0)
 	{
 		if (5 != argc) {
@@ -611,7 +611,7 @@ static void pwm_Command(char *pcWriteBuffer, int xWriteBufferLen, int argc, char
 		cap_value = bk_pwm_get_capvalue(channel1);
 		PERI_LOGI(TAG, "pwm : %d cap_value=%x \r\n", channel1, cap_value);
 	}
-	#if ((CFG_SOC_NAME == SOC_BK7231N) || (CFG_SOC_NAME == SOC_BK7236))
+	#if ((CFG_SOC_NAME == SOC_BL2028N) || (CFG_SOC_NAME == SOC_BK7236))
 	else if (os_strcmp(argv[1], "cw") == 0)
 	{
 

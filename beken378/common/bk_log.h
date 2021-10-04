@@ -33,10 +33,10 @@ extern "C" {
 #if CFG_LEGACY_LOG
 
 #define BK_LOGE( tag, format, ... ) os_printf(format, ##__VA_ARGS__)
-#define BK_LOGW( tag, format, ... ) os_printf(format, ##__VA_ARGS__)
-#define BK_LOGI( tag, format, ... ) os_printf(format, ##__VA_ARGS__)
-#define BK_LOGD( tag, format, ... ) os_printf(format, ##__VA_ARGS__)
-#define BK_LOGV( tag, format, ... ) os_printf(format, ##__VA_ARGS__)
+#define BK_LOGW( tag, format, ... ) os_null_printf(format, ##__VA_ARGS__)
+#define BK_LOGI( tag, format, ... ) os_null_printf(format, ##__VA_ARGS__)
+#define BK_LOGD( tag, format, ... ) os_null_printf(format, ##__VA_ARGS__)
+#define BK_LOGV( tag, format, ... ) os_null_printf(format, ##__VA_ARGS__)
 
 #else
 

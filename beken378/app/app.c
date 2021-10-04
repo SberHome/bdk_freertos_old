@@ -52,7 +52,11 @@
 beken_thread_t  init_thread_handle;
 beken_thread_t  app_thread_handle;
 uint32_t  init_stack_size = 2000;
+#if CFG_IPERF_TEST_ACCEL
+uint32_t  app_stack_size = 2048;
+#else
 uint32_t  app_stack_size = 4096;
+#endif
 
 beken_semaphore_t app_sema = NULL;
 WIFI_CORE_T g_wifi_core = {0};

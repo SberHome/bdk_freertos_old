@@ -297,4 +297,7 @@
 #define HOSTAP_THREAD_SAFE_WORKAROUND 1
 #endif
 
+/* fixed scan interval from previous connect request regardless of connection time */
+#define CONFIG_WPA_FIXED_SCAN_INTERVAL
+
 #endif /* BUILD_CONFIG_H */
