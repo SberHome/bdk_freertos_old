@@ -10,6 +10,7 @@
 #include "fake_clock_pub.h"
 #include "mem_pub.h"
 #include "uart_pub.h"
+#include "calendar_pub.h"
 
 /******************************************************
  *                      Macros
