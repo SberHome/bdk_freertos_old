@@ -4,6 +4,7 @@ import os
 import sys
 import json
 import argparse
+import platform
 
 out_json = {
     "magic": "RT-Thread",
@@ -82,7 +83,10 @@ out_json = json.dumps(out_json, sort_keys=True, indent=4)
 with open(str(out_path), "w") as f:
     f.write(out_json)
 
-os.system("beken_packager.exe {}".format(out_path))
+if platform.system() == 'Linux':
+    os.system("./beken_packager {}".format(out_path))
+elif platform.system() == 'Windows':
+    os.system("beken_packager.exe {}".format(out_path))
 #os.system("move all_2M.1220.bin {}".format(out_dir))
 #os.system("move beken7231_bsp_uart_2M.1220.bin {}".format(out_dir))
 #print ("cp " + bootloader_str + " {}/".format(out_dir))
