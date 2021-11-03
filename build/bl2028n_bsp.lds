@@ -352,6 +352,13 @@ SECTIONS
 	_data_ram_begin = ADDR(.data);
 	_data_ram_end = .;
 
+    .init_array_out :
+    {
+        KEEP(*(.init_array))
+    }
+    /* Если у нас появилась секция с конструкторами глобальных объектов, то выводим ошибку */
+    ASSERT(SIZEOF(.init_array_out)==0, "Use of global constructors is forbidden")
+
 /* uninitialized data section - global   int i; */
 	.bss ALIGN(8):
 	{
