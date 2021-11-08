@@ -1,6 +1,6 @@
 /* logging.c
  *
- * Copyright (C) 2006-2019 wolfSSL Inc.
+ * Copyright (C) 2006-2021 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -34,11 +34,19 @@
 #endif
 
 #if defined(OPENSSL_EXTRA) || defined(DEBUG_WOLFSSL_VERBOSE)
-static wolfSSL_Mutex debug_mutex; /* mutex for access to debug structure */
+static
+#ifdef ERROR_QUEUE_PER_THREAD
+THREAD_LS_T
+#endif
+wolfSSL_Mutex debug_mutex; /* mutex for access to debug structure */
 
 /* accessing any node from the queue should be wrapped in a lock of
  * debug_mutex */
-static void* wc_error_heap;
+static
+#ifdef ERROR_QUEUE_PER_THREAD
+THREAD_LS_T
+#endif
+void* wc_error_heap;
 struct wc_error_queue {
     void*  heap; /* the heap hint used with nodes creation */
     struct wc_error_queue* next;
@@ -48,10 +56,32 @@ struct wc_error_queue {
     int    value;
     int    line;
 };
+#ifdef ERROR_QUEUE_PER_THREAD
+THREAD_LS_T
+#endif
 volatile struct wc_error_queue* wc_errors;
-static struct wc_error_queue* wc_current_node;
-static struct wc_error_queue* wc_last_node;
+static
+#ifdef ERROR_QUEUE_PER_THREAD
+THREAD_LS_T
+#endif
+struct wc_error_queue* wc_current_node;
+static
+#ifdef ERROR_QUEUE_PER_THREAD
+THREAD_LS_T
+#endif
+struct wc_error_queue* wc_last_node;
 /* pointer to last node in queue to make insertion O(1) */
+
+#ifndef ERROR_QUEUE_MAX
+    /* this breaks from compat of unlimited error queue size */
+    #define ERROR_QUEUE_MAX 100
+#endif
+static
+#ifdef ERROR_QUEUE_PER_THREAD
+THREAD_LS_T
+#endif
+int wc_error_queue_count = 0;
+
 #endif
 
 #ifdef WOLFSSL_FUNC_TIME
@@ -111,6 +141,38 @@ static WC_INLINE double current_time(int reset)
 }
 #endif /* WOLFSSL_FUNC_TIME */
 
+#ifdef HAVE_WC_INTROSPECTION
+
+const char *wolfSSL_configure_args(void) {
+#ifdef LIBWOLFSSL_CONFIGURE_ARGS
+  /* the spaces on either side are to make matching simple and efficient. */
+  return " " LIBWOLFSSL_CONFIGURE_ARGS " ";
+#else
+  return NULL;
+#endif
+}
+
+PEDANTIC_EXTENSION const char *wolfSSL_global_cflags(void) {
+#ifdef LIBWOLFSSL_GLOBAL_CFLAGS
+  /* the spaces on either side are to make matching simple and efficient. */
+  return " " LIBWOLFSSL_GLOBAL_CFLAGS " ";
+#else
+  return NULL;
+#endif
+}
+
+#endif /* HAVE_WC_INTROSPECTION */
+
+#ifdef HAVE_STACK_SIZE_VERBOSE
+
+THREAD_LS_T unsigned char *StackSizeCheck_myStack = NULL;
+THREAD_LS_T size_t StackSizeCheck_stackSize = 0;
+THREAD_LS_T size_t StackSizeCheck_stackSizeHWM = 0;
+THREAD_LS_T size_t *StackSizeCheck_stackSizeHWM_ptr = 0;
+THREAD_LS_T void *StackSizeCheck_stackOffsetPointer = 0;
+
+#endif /* HAVE_STACK_SIZE_VERBOSE */
+
 #ifdef DEBUG_WOLFSSL
 
 /* Set these to default values initially. */
@@ -124,6 +186,12 @@ static struct log mynewt_log;
 
 #endif /* DEBUG_WOLFSSL */
 
+#ifdef DEBUG_VECTOR_REGISTER_ACCESS
+THREAD_LS_T int wc_svr_count = 0;
+THREAD_LS_T const char *wc_svr_last_file = NULL;
+THREAD_LS_T int wc_svr_last_line = -1;
+#endif
+
 
 /* allow this to be set to NULL, so logs can be redirected to default output */
 int wolfSSL_SetLoggingCb(wolfSSL_Logging_cb f)
@@ -134,6 +202,16 @@ int wolfSSL_SetLoggingCb(wolfSSL_Logging_cb f)
 #else
     (void)f;
     return NOT_COMPILED_IN;
+#endif
+}
+
+/* allow this to be set to NULL, so logs can be redirected to default output */
+wolfSSL_Logging_cb wolfSSL_GetLoggingCb(void)
+{
+#ifdef DEBUG_WOLFSSL
+    return log_function;
+#else
+    return NULL;
 #endif
 }
 
@@ -166,20 +244,24 @@ void wolfSSL_Debugging_OFF(void)
  */
 void WOLFSSL_START(int funcNum)
 {
-    double now = current_time(0) * 1000.0;
-#ifdef WOLFSSL_FUNC_TIME_LOG
-    fprintf(stderr, "%17.3f: START - %s\n", now, wc_func_name[funcNum]);
-#endif
-    wc_func_start[funcNum] = now;
+    if (funcNum < WC_FUNC_COUNT) {
+        double now = current_time(0) * 1000.0;
+    #ifdef WOLFSSL_FUNC_TIME_LOG
+        fprintf(stderr, "%17.3f: START - %s\n", now, wc_func_name[funcNum]);
+    #endif
+        wc_func_start[funcNum] = now;
+    }
 }
 
 void WOLFSSL_END(int funcNum)
 {
-    double now = current_time(0) * 1000.0;
-    wc_func_time[funcNum] += now - wc_func_start[funcNum];
-#ifdef WOLFSSL_FUNC_TIME_LOG
-    fprintf(stderr, "%17.3f: END   - %s\n", now, wc_func_name[funcNum]);
-#endif
+    if (funcNum < WC_FUNC_COUNT) {
+        double now = current_time(0) * 1000.0;
+        wc_func_time[funcNum] += now - wc_func_start[funcNum];
+    #ifdef WOLFSSL_FUNC_TIME_LOG
+        fprintf(stderr, "%17.3f: END   - %s\n", now, wc_func_name[funcNum]);
+    #endif
+    }
 }
 
 void WOLFSSL_TIME(int count)
@@ -201,11 +283,7 @@ void WOLFSSL_TIME(int count)
 #ifdef DEBUG_WOLFSSL
 
 #if defined(FREESCALE_MQX) || defined(FREESCALE_KSDK_MQX)
-    #if MQX_USE_IO_OLD
-        #include <fio.h>
-    #else
-        #include <nio.h>
-    #endif
+    /* see wc_port.h for fio.h and nio.h includes */
 #elif defined(WOLFSSL_SGX)
     /* Declare sprintf for ocall */
     int sprintf(char* buf, const char *fmt, ...);
@@ -222,8 +300,18 @@ void WOLFSSL_TIME(int count)
 #elif defined(WOLFSSL_TELIT_M2MB)
     #include <stdio.h>
     #include "m2m_log.h"
+#elif defined(WOLFSSL_ANDROID_DEBUG)
+    #include <android/log.h>
+#elif defined(WOLFSSL_XILINX)
+    #include "xil_printf.h"
+#elif defined(WOLFSSL_LINUXKM)
+    /* the requisite linux/kernel.h is included in wc_port.h, with incompatible warnings masked out. */
+#elif defined(FUSION_RTOS)
+    #include <fclstdio.h>
+    #include <wolfssl/wolfcrypt/wc_port.h>
+    #define fprintf FCL_FPRINTF
 #else
-    #include <stdio.h>   /* for default printf stuff */
+    #include <stdio.h>  /* for default printf stuff */
 #endif
 
 #if defined(THREADX) && !defined(THREADX_NO_DC_PRINTF)
@@ -255,7 +343,6 @@ static void wolfssl_log(const int logLevel, const char *const logMessage)
         fnDebugMsg("\r\n");
 #elif defined(MQX_USE_IO_OLD)
         fprintf(_mqxio_stderr, "%s\n", logMessage);
-
 #elif defined(WOLFSSL_APACHE_MYNEWT)
         LOG_DEBUG(&mynewt_log, LOG_MODULE_DEFAULT, "%s\n", logMessage);
 #elif defined(WOLFSSL_ESPIDF)
@@ -264,6 +351,12 @@ static void wolfssl_log(const int logLevel, const char *const logMessage)
         printk("%s\n", logMessage);
 #elif defined(WOLFSSL_TELIT_M2MB)
         M2M_LOG_INFO("%s\n", logMessage);
+#elif defined(WOLFSSL_ANDROID_DEBUG)
+        __android_log_print(ANDROID_LOG_VERBOSE, "[wolfSSL]", "%s", logMessage);
+#elif defined(WOLFSSL_XILINX)
+        xil_printf("%s\r\n", logMessage);
+#elif defined(WOLFSSL_LINUXKM)
+        printk("%s\n", logMessage);
 #else
         fprintf(stderr, "%s\n", logMessage);
 #endif
@@ -277,41 +370,52 @@ void WOLFSSL_MSG(const char* msg)
         wolfssl_log(INFO_LOG , msg);
 }
 
-
+#ifndef LINE_LEN
+#define LINE_LEN 16
+#endif
 void WOLFSSL_BUFFER(const byte* buffer, word32 length)
 {
-    #define LINE_LEN 16
+    int i, buflen = (int)length, bufidx;
+    char line[(LINE_LEN * 4) + 3]; /* \t00..0F | chars...chars\0 */
 
-    if (loggingEnabled) {
-        word32 i;
-        char line[80];
+    if (!loggingEnabled) {
+        return;
+    }
 
-        if (!buffer) {
-            wolfssl_log(INFO_LOG, "\tNULL");
+    if (!buffer) {
+        wolfssl_log(INFO_LOG, "\tNULL");
+        return;
+    }
 
-            return;
-        }
-
-        sprintf(line, "\t");
+    while (buflen > 0) {
+        bufidx = 0;
+        XSNPRINTF(&line[bufidx], sizeof(line)-bufidx, "\t");
+        bufidx++;
 
         for (i = 0; i < LINE_LEN; i++) {
-            if (i < length)
-                sprintf(line + 1 + i * 3,"%02x ", buffer[i]);
-            else
-                sprintf(line + 1 + i * 3, "   ");
+            if (i < buflen) {
+                XSNPRINTF(&line[bufidx], sizeof(line)-bufidx, "%02x ", buffer[i]);
+            }
+            else {
+                XSNPRINTF(&line[bufidx], sizeof(line)-bufidx, "   ");
+            }
+            bufidx += 3;
         }
 
-        sprintf(line + 1 + LINE_LEN * 3, "| ");
+        XSNPRINTF(&line[bufidx], sizeof(line)-bufidx, "| ");
+        bufidx++;
 
-        for (i = 0; i < LINE_LEN; i++)
-            if (i < length)
-                sprintf(line + 3 + LINE_LEN * 3 + i,
+        for (i = 0; i < LINE_LEN; i++) {
+            if (i < buflen) {
+                XSNPRINTF(&line[bufidx], sizeof(line)-bufidx,
                      "%c", 31 < buffer[i] && buffer[i] < 127 ? buffer[i] : '.');
+                bufidx++;
+            }
+        }
 
         wolfssl_log(INFO_LOG, line);
-
-        if (length > LINE_LEN)
-            WOLFSSL_BUFFER(buffer + LINE_LEN, length - LINE_LEN);
+        buffer += LINE_LEN;
+        buflen -= LINE_LEN;
     }
 }
 
@@ -335,18 +439,25 @@ void WOLFSSL_LEAVE(const char* msg, int ret)
         wolfssl_log(LEAVE_LOG , buffer);
     }
 }
+
+WOLFSSL_API int WOLFSSL_IS_DEBUG_ON(void)
+{
+    return loggingEnabled;
+}
 #endif /* !WOLFSSL_DEBUG_ERRORS_ONLY */
 #endif /* DEBUG_WOLFSSL */
 
 /*
  * When using OPENSSL_EXTRA or DEBUG_WOLFSSL_VERBOSE macro then WOLFSSL_ERROR is
- * mapped to new funtion WOLFSSL_ERROR_LINE which gets the line # and function
+ * mapped to new function WOLFSSL_ERROR_LINE which gets the line # and function
  * name where WOLFSSL_ERROR is called at.
  */
 #if defined(DEBUG_WOLFSSL) || defined(OPENSSL_ALL) || \
-    defined(WOLFSSL_NGINX) || defined(WOLFSSL_HAPROXY)
+    defined(WOLFSSL_NGINX) || defined(WOLFSSL_HAPROXY) || \
+    defined(OPENSSL_EXTRA)
 
-#if defined(OPENSSL_EXTRA) || defined(DEBUG_WOLFSSL_VERBOSE)
+#if (defined(OPENSSL_EXTRA) && !defined(_WIN32) && !defined(NO_ERROR_QUEUE)) \
+    || defined(DEBUG_WOLFSSL_VERBOSE)
 void WOLFSSL_ERROR_LINE(int error, const char* func, unsigned int line,
         const char* file, void* usrCtx)
 #else
@@ -359,7 +470,8 @@ void WOLFSSL_ERROR(int error)
     {
         char buffer[WOLFSSL_MAX_ERROR_SZ];
 
-    #if defined(OPENSSL_EXTRA) || defined(DEBUG_WOLFSSL_VERBOSE)
+    #if (defined(OPENSSL_EXTRA) && !defined(_WIN32) && \
+            !defined(NO_ERROR_QUEUE)) || defined(DEBUG_WOLFSSL_VERBOSE)
         (void)usrCtx; /* a user ctx for future flexibility */
         (void)func;
 
@@ -379,6 +491,7 @@ void WOLFSSL_ERROR(int error)
             XSNPRINTF(buffer, sizeof(buffer),
                     "wolfSSL error occurred, error = %d line:%d file:%s",
                     error, line, file);
+
             if (wc_AddErrorNode(error, line, buffer, (char*)file) != 0) {
                 WOLFSSL_MSG("Error creating logging node");
                 /* with void function there is no return here, continue on
@@ -389,7 +502,6 @@ void WOLFSSL_ERROR(int error)
             else {
                 XSNPRINTF(buffer, sizeof(buffer),
                     "wolfSSL error occurred, error = %d", error);
-
             }
             #endif
 
@@ -427,6 +539,7 @@ int wc_LoggingInit(void)
         WOLFSSL_MSG("Bad Init Mutex");
         return BAD_MUTEX_E;
     }
+    wc_error_queue_count = 0;
     wc_errors          = NULL;
     wc_current_node    = NULL;
     wc_last_node       = NULL;
@@ -459,7 +572,7 @@ int wc_LoggingCleanup(void)
  * line  : line number that error happened at
  *
  * Returns a negative value in error case, on success returns the nodes error
- * value which is positve (absolute value)
+ * value which is positive (absolute value)
  */
 int wc_PeekErrorNode(int idx, const char **file, const char **reason,
         int *line)
@@ -473,11 +586,6 @@ int wc_PeekErrorNode(int idx, const char **file, const char **reason,
 
     if (idx < 0) {
         err = wc_last_node;
-        if (err == NULL) {
-            WOLFSSL_MSG("No Errors in queue");
-            wc_UnLockMutex(&debug_mutex);
-            return BAD_STATE_E;
-        }
     }
     else {
         int i;
@@ -491,6 +599,12 @@ int wc_PeekErrorNode(int idx, const char **file, const char **reason,
             }
             err = err->next;
         }
+    }
+
+    if (err == NULL) {
+        WOLFSSL_MSG("No Errors in queue");
+        wc_UnLockMutex(&debug_mutex);
+        return BAD_STATE_E;
     }
 
     if (file != NULL) {
@@ -563,8 +677,19 @@ int wc_PullErrorNode(const char **file, const char **reason, int *line)
  * function. debug_mutex should be locked before a call to this function. */
 int wc_AddErrorNode(int error, int line, char* buf, char* file)
 {
-
+#if defined(NO_ERROR_QUEUE)
+    (void)error;
+    (void)line;
+    (void)buf;
+    (void)file;
+    WOLFSSL_MSG("Error queue turned off, can not add nodes");
+#else
     struct wc_error_queue* err;
+
+    if (wc_error_queue_count >= ERROR_QUEUE_MAX) {
+        WOLFSSL_MSG("Error queue is full, at ERROR_QUEUE_MAX");
+        return MEMORY_E;
+    }
 
     err = (struct wc_error_queue*)XMALLOC(
             sizeof(struct wc_error_queue), wc_error_heap, DYNAMIC_TYPE_LOG);
@@ -630,8 +755,9 @@ int wc_AddErrorNode(int error, int line, char* buf, char* file)
                 wc_current_node = err;
             }
         }
+        wc_error_queue_count++;
     }
-
+#endif
     return 0;
 }
 
@@ -658,11 +784,16 @@ void wc_RemoveErrorNode(int idx)
     if (current != NULL) {
         if (current->prev != NULL)
             current->prev->next = current->next;
+        if (current->next != NULL)
+            current->next->prev = current->prev;
         if (wc_last_node == current)
             wc_last_node = current->prev;
         if (wc_errors == current)
             wc_errors = current->next;
+        if (wc_current_node == current)
+            wc_current_node = current->next;
         XFREE(current, current->heap, DYNAMIC_TYPE_LOG);
+        wc_error_queue_count--;
     }
 
     wc_UnLockMutex(&debug_mutex);
@@ -694,6 +825,7 @@ void wc_ClearErrorNodes(void)
         }
     }
 
+    wc_error_queue_count = 0;
     wc_errors       = NULL;
     wc_last_node    = NULL;
     wc_current_node = NULL;
@@ -735,6 +867,7 @@ int wc_ERR_remove_state(void)
         current = next;
     }
 
+    wc_error_queue_count = 0;
     wc_errors          = NULL;
     wc_last_node       = NULL;
 
@@ -743,42 +876,63 @@ int wc_ERR_remove_state(void)
     return 0;
 }
 
-
 #if !defined(NO_FILESYSTEM) && !defined(NO_STDIO_FILESYSTEM)
 /* empties out the error queue into the file */
+static int wc_ERR_dump_to_file (const char *str, size_t len, void *u)
+{
+    XFILE fp = (XFILE ) u;
+    fprintf(fp, "%-*.*s\n", (int)len, (int)len, str);
+    return 0;
+}
+
+/* This callback allows the application to provide a custom error printing
+ * function. */
+void wc_ERR_print_errors_cb(int (*cb)(const char *str, size_t len, void *u),
+                            void *u)
+{
+    WOLFSSL_ENTER("wc_ERR_print_errors_cb");
+
+    if (cb == NULL) {
+        /* Invalid param */
+        return;
+    }
+
+    if (wc_LockMutex(&debug_mutex) != 0)
+    {
+        WOLFSSL_MSG("Lock debug mutex failed");
+    }
+    else
+    {
+        /* free all nodes from error queue and print them to file */
+        struct wc_error_queue *current;
+        struct wc_error_queue *next;
+
+        current = (struct wc_error_queue *)wc_errors;
+        while (current != NULL)
+        {
+            next = current->next;
+            cb(current->error, XSTRLEN(current->error), u);
+            XFREE(current, current->heap, DYNAMIC_TYPE_LOG);
+            current = next;
+        }
+
+        /* set global pointers to match having been freed */
+        wc_error_queue_count = 0;
+        wc_errors = NULL;
+        wc_last_node = NULL;
+
+        wc_UnLockMutex(&debug_mutex);
+    }
+}
+
 void wc_ERR_print_errors_fp(XFILE fp)
 {
     WOLFSSL_ENTER("wc_ERR_print_errors_fp");
 
-        if (wc_LockMutex(&debug_mutex) != 0)
-        {
-            WOLFSSL_MSG("Lock debug mutex failed");
-        }
-        else
-        {
-            /* free all nodes from error queue and print them to file */
-            {
-                struct wc_error_queue *current;
-                struct wc_error_queue *next;
-
-                current = (struct wc_error_queue *)wc_errors;
-                while (current != NULL)
-                {
-                    next = current->next;
-                    fprintf(fp, "%s\n", current->error);
-                    XFREE(current, current->heap, DYNAMIC_TYPE_LOG);
-                    current = next;
-                }
-
-                /* set global pointers to match having been freed */
-                wc_errors = NULL;
-                wc_last_node = NULL;
-            }
-
-            wc_UnLockMutex(&debug_mutex);
-        }
+    /* Send all errors to the wc_ERR_dump_to_file function */
+    wc_ERR_print_errors_cb(wc_ERR_dump_to_file, fp);
 }
+
 #endif /* !defined(NO_FILESYSTEM) && !defined(NO_STDIO_FILESYSTEM) */
 
 #endif /* defined(OPENSSL_EXTRA) || defined(DEBUG_WOLFSSL_VERBOSE) */
-

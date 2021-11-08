@@ -1,6 +1,6 @@
 /* sha.h
  *
- * Copyright (C) 2006-2019 wolfSSL Inc.
+ * Copyright (C) 2006-2021 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -52,6 +52,10 @@
     #include "fsl_ltc.h"
 #endif
 
+#ifdef WOLFSSL_IMXRT_DCP
+	#include "fsl_dcp.h"
+#endif
+
 #ifdef __cplusplus
     extern "C" {
 #endif
@@ -71,6 +75,9 @@
 #endif
 #ifdef WOLFSSL_ESP32WROOM32_CRYPT
     #include <wolfssl/wolfcrypt/port/Espressif/esp32-crypt.h>
+#endif
+#if defined(WOLFSSL_SILABS_SE_ACCEL)
+    #include <wolfssl/wolfcrypt/port/silabs/silabs_hash.h>
 #endif
 
 #if !defined(NO_OLD_SHA_NAMES)
@@ -96,16 +103,30 @@ enum {
 #if defined(WOLFSSL_TI_HASH)
     #include "wolfssl/wolfcrypt/port/ti/ti-hash.h"
 
-#elif defined(WOLFSSL_IMX6_CAAM)
+#elif defined(WOLFSSL_IMX6_CAAM) && !defined(WOLFSSL_QNX_CAAM)
     #include "wolfssl/wolfcrypt/port/caam/wolfcaam_sha.h"
-
+#elif defined(WOLFSSL_RENESAS_TSIP_CRYPT) && \
+   !defined(NO_WOLFSSL_RENESAS_TSIP_CRYPT_HASH)
+    #include "wolfssl/wolfcrypt/port/Renesas/renesas-tsip-crypt.h"
 #else
+
+#if defined(WOLFSSL_SE050)
+    #include "wolfssl/wolfcrypt/port/nxp/se050_port.h"
+#endif
+
 /* Sha digest */
-typedef struct wc_Sha {
+struct wc_Sha {
 #ifdef FREESCALE_LTC_SHA
         ltc_hash_ctx_t ctx;
+#elif defined(WOLFSSL_SE050)
+        SE050_HASH_Context se050Ctx;
 #elif defined(STM32_HASH)
         STM32_HASH_Context stmCtx;
+#elif defined(WOLFSSL_SILABS_SE_ACCEL)
+        wc_silabs_sha_t silabsCtx;
+#elif defined(WOLFSSL_IMXRT_DCP)
+        dcp_handle_t handle;
+        dcp_hash_ctx_t ctx;
 #else
         word32  buffLen;   /* in bytes          */
         word32  loLen;     /* length in bytes   */
@@ -132,10 +153,15 @@ typedef struct wc_Sha {
    !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH)
     WC_ESP32SHA ctx;
 #endif
-#if defined(WOLFSSL_HASH_FLAGS) || defined(WOLF_CRYPTO_CB)
+#ifdef WOLFSSL_HASH_FLAGS
     word32 flags; /* enum wc_HashFlags in hash.h */
 #endif
-} wc_Sha;
+};
+
+#ifndef WC_SHA_TYPE_DEFINED
+    typedef struct wc_Sha wc_Sha;
+    #define WC_SHA_TYPE_DEFINED
+#endif
 
 #endif /* WOLFSSL_TI_HASH */
 
@@ -151,14 +177,17 @@ WOLFSSL_API void wc_ShaFree(wc_Sha*);
 
 WOLFSSL_API int wc_ShaGetHash(wc_Sha*, byte*);
 WOLFSSL_API int wc_ShaCopy(wc_Sha*, wc_Sha*);
+#if defined(OPENSSL_EXTRA)
+WOLFSSL_API int wc_ShaTransform(wc_Sha*, const byte*);
+#endif
 
 #ifdef WOLFSSL_PIC32MZ_HASH
 WOLFSSL_API void wc_ShaSizeSet(wc_Sha* sha, word32 len);
 #endif
 
-#if defined(WOLFSSL_HASH_FLAGS) || defined(WOLF_CRYPTO_CB)
-    WOLFSSL_LOCAL int wc_ShaSetFlags(wc_Sha* sha, word32 flags);
-    WOLFSSL_LOCAL int wc_ShaGetFlags(wc_Sha* sha, word32* flags);
+#ifdef WOLFSSL_HASH_FLAGS
+    WOLFSSL_API int wc_ShaSetFlags(wc_Sha* sha, word32 flags);
+    WOLFSSL_API int wc_ShaGetFlags(wc_Sha* sha, word32* flags);
 #endif
 
 #ifdef __cplusplus

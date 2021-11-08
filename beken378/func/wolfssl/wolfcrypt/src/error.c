@@ -1,6 +1,6 @@
 /* error.c
  *
- * Copyright (C) 2006-2019 wolfSSL Inc.
+ * Copyright (C) 2006-2021 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -194,9 +194,6 @@ const char* wc_GetErrorString(int error)
     case ASN_DH_KEY_E :
         return "ASN key init error, invalid input";
 
-    case ASN_NTRU_KEY_E :
-        return "ASN NTRU key decode error, invalid input";
-
     case ASN_CRIT_EXT_E:
         return "X.509 Critical extension ignored or invalid";
 
@@ -259,6 +256,9 @@ const char* wc_GetErrorString(int error)
 
     case ASN_CRL_NO_SIGNER_E :
         return "ASN CRL no signer error to confirm failure";
+
+    case CRL_CERT_DATE_ERR:
+        return "CRL date error";
 
     case ASN_OCSP_CONFIRM_E :
         return "ASN OCSP sig error, confirm failure";
@@ -509,6 +509,51 @@ const char* wc_GetErrorString(int error)
     case PKCS7_SIGNEEDS_CHECK:
         return "Signature found but no certificate to verify";
 
+    case PSS_SALTLEN_RECOVER_E:
+        return "PSS - Salt length unable to be recovered";
+
+    case CHACHA_POLY_OVERFLOW:
+        return "wolfcrypt - ChaCha20_Poly1305 limit overflow 4GB";
+
+    case ASN_SELF_SIGNED_E:
+        return "ASN self-signed certificate error";
+
+    case SAKKE_VERIFY_FAIL_E:
+        return "SAKKE derivation verification error";
+
+    case MISSING_IV:
+        return "Required IV not set";
+
+    case MISSING_KEY:
+        return "Required key not set";
+
+    case BAD_LENGTH_E:
+        return "Value of length parameter is invalid.";
+
+    case ECDSA_KAT_FIPS_E:
+        return "wolfcrypt FIPS ECDSA Known Answer Test Failure";
+
+    case RSA_PAT_FIPS_E:
+        return "wolfcrypt FIPS RSA Pairwise Agreement Test Failure";
+
+    case KDF_TLS12_KAT_FIPS_E:
+        return "wolfcrypt FIPS TLSv1.2 KDF Known Answer Test Failure";
+
+    case KDF_TLS13_KAT_FIPS_E:
+        return "wolfcrypt FIPS TLSv1.3 KDF Known Answer Test Failure";
+
+    case KDF_SSH_KAT_FIPS_E:
+        return "wolfcrypt FIPS SSH KDF Known Answer Test Failure";
+
+     case DHE_PCT_E:
+        return "wolfcrypt DHE Pairwise Consistency Test Failure";
+
+    case ECC_PCT_E:
+        return "wolfcrypt ECDHE Pairwise Consistency Test Failure";
+
+    case FIPS_PRIVATE_KEY_LOCKED_E:
+        return "Cannot export private key, locked";
+
     default:
         return "unknown error number";
 
@@ -518,6 +563,7 @@ const char* wc_GetErrorString(int error)
 void wc_ErrorString(int error, char* buffer)
 {
     XSTRNCPY(buffer, wc_GetErrorString(error), WOLFSSL_MAX_ERROR_SZ);
+    buffer[WOLFSSL_MAX_ERROR_SZ-1] = 0;
 }
 #endif /* !NO_ERROR_STRINGS */
 

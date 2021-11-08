@@ -1,6 +1,6 @@
 /* hmac.h
  *
- * Copyright (C) 2006-2019 wolfSSL Inc.
+ * Copyright (C) 2006-2021 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -80,15 +80,15 @@ enum {
 #endif
 #ifndef WOLFSSL_SHA512
     WC_SHA512  = WC_HASH_TYPE_SHA512,
+    #ifndef WOLFSSL_NOSHA512_224
+    WC_SHA512_224  = WC_HASH_TYPE_SHA512_224,
+    #endif
+    #ifndef WOLFSSL_NOSHA512_256
+    WC_SHA512_256  = WC_HASH_TYPE_SHA512_256,
+    #endif
 #endif
 #ifndef WOLFSSL_SHA384
     WC_SHA384  = WC_HASH_TYPE_SHA384,
-#endif
-#ifndef HAVE_BLAKE2B
-    BLAKE2B_ID = WC_HASH_TYPE_BLAKE2B,
-#endif
-#ifndef HAVE_BLAKE2S
-    BLAKE2S_ID = WC_HASH_TYPE_BLAKE2S,
 #endif
 #ifndef WOLFSSL_SHA224
     WC_SHA224  = WC_HASH_TYPE_SHA224,
@@ -100,16 +100,17 @@ enum {
     WC_SHA3_512 = WC_HASH_TYPE_SHA3_512,
 #endif
 #ifdef HAVE_PKCS11
-    HMAC_MAX_ID_LEN = 32,
+    HMAC_MAX_ID_LEN    = 32,
+    HMAC_MAX_LABEL_LEN = 32,
 #endif
 };
 
 /* Select the largest available hash for the buffer size. */
 #define WC_HMAC_BLOCK_SIZE WC_MAX_BLOCK_SIZE
 
-#if !defined(WOLFSSL_SHA3) && !defined(WOLFSSL_SHA512) && !defined(HAVE_BLAKE2) && \
-    !defined(WOLFSSL_SHA384) && defined(NO_SHA256) && defined(WOLFSSL_SHA224) && \
-     defined(NO_SHA) && defined(NO_MD5)
+#if !defined(WOLFSSL_SHA3) && !defined(WOLFSSL_SHA512) && \
+    !defined(WOLFSSL_SHA384) && defined(NO_SHA256) && \
+    defined(WOLFSSL_SHA224) && defined(NO_SHA) && defined(NO_MD5)
     #error "You have to have some kind of hash if you want to use HMAC."
 #endif
 
@@ -134,23 +135,23 @@ typedef union {
 #ifdef WOLFSSL_SHA512
     wc_Sha512 sha512;
 #endif
-#ifdef HAVE_BLAKE2
-    Blake2b blake2b;
-#endif
 #ifdef WOLFSSL_SHA3
     wc_Sha3 sha3;
 #endif
-} Hash;
+} wc_Hmac_Hash;
 
 /* Hmac digest */
-typedef struct Hmac {
-    Hash    hash;
+struct Hmac {
+    wc_Hmac_Hash    hash;
     word32  ipad[WC_HMAC_BLOCK_SIZE  / sizeof(word32)];  /* same block size all*/
     word32  opad[WC_HMAC_BLOCK_SIZE  / sizeof(word32)];
     word32  innerHash[WC_MAX_DIGEST_SIZE / sizeof(word32)];
     void*   heap;                 /* heap hint */
     byte    macType;              /* md5 sha or sha256 */
     byte    innerHashKeyed;       /* keyed flag */
+#ifdef WOLFSSL_KCAPI_HMAC
+    struct kcapi_handle* handle;
+#endif
 #ifdef WOLFSSL_ASYNC_CRYPT
     WC_ASYNC_DEV asyncDev;
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -162,11 +163,19 @@ typedef struct Hmac {
 #ifdef HAVE_PKCS11
     byte    id[HMAC_MAX_ID_LEN];
     int     idLen;
+    char    label[HMAC_MAX_LABEL_LEN];
+    int     labelLen;
 #endif
 #if defined(WOLFSSL_ASYNC_CRYPT) || defined(WOLF_CRYPTO_CB)
     word16  keyLen;          /* hmac key length (key in ipad) */
 #endif
-} Hmac;
+};
+
+#ifndef WC_HMAC_TYPE_DEFINED
+    typedef struct Hmac Hmac;
+    #define WC_HMAC_TYPE_DEFINED
+#endif
+
 
 #endif /* HAVE_FIPS */
 
@@ -174,11 +183,21 @@ typedef struct Hmac {
 WOLFSSL_API int wc_HmacSetKey(Hmac*, int type, const byte* key, word32 keySz);
 WOLFSSL_API int wc_HmacUpdate(Hmac*, const byte*, word32);
 WOLFSSL_API int wc_HmacFinal(Hmac*, byte*);
+#ifdef WOLFSSL_KCAPI_HMAC
+WOLFSSL_API int wc_HmacSetKey_Software(Hmac*, int type, const byte* key,
+                                       word32 keySz);
+WOLFSSL_API int wc_HmacUpdate_Software(Hmac*, const byte*, word32);
+WOLFSSL_API int wc_HmacFinal_Software(Hmac*, byte*);
+#endif
 WOLFSSL_API int wc_HmacSizeByType(int type);
 
 WOLFSSL_API int wc_HmacInit(Hmac* hmac, void* heap, int devId);
+#ifdef HAVE_PKCS11
 WOLFSSL_API int wc_HmacInit_Id(Hmac* hmac, byte* id, int len, void* heap,
                                int devId);
+WOLFSSL_API int wc_HmacInit_Label(Hmac* hmac, const char* label, void* heap,
+                                  int devId);
+#endif
 WOLFSSL_API void wc_HmacFree(Hmac*);
 
 WOLFSSL_API int wolfSSL_GetHmacMaxSize(void);

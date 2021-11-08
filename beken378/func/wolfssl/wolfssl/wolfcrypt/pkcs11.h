@@ -1,12 +1,12 @@
 /* pkcs11.h
  *
- * Copyright (C) 2006-2019 wolfSSL Inc.
+ * Copyright (C) 2006-2021 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
  * wolfSSL is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
+ * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
  * wolfSSL is distributed in the hope that it will be useful,
@@ -345,6 +345,10 @@ typedef CK_FUNCTION_LIST* CK_FUNCTION_LIST_PTR;
 typedef CK_FUNCTION_LIST_PTR* CK_FUNCTION_LIST_PTR_PTR;
 
 typedef CK_RV (*CK_C_GetFunctionList)(CK_FUNCTION_LIST_PTR_PTR ppFunctionList);
+
+#ifdef HAVE_PKCS11_STATIC
+CK_RV C_GetFunctionList(CK_FUNCTION_LIST_PTR_PTR ppFunctionList);
+#endif
 
 struct CK_FUNCTION_LIST {
     CK_VERSION version;

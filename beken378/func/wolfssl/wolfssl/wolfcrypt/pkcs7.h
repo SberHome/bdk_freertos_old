@@ -1,6 +1,6 @@
 /* pkcs7.h
  *
- * Copyright (C) 2006-2019 wolfSSL Inc.
+ * Copyright (C) 2006-2021 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -41,6 +41,7 @@
 #ifndef NO_DES3
     #include <wolfssl/wolfcrypt/des3.h>
 #endif
+#include <wolfssl/wolfcrypt/wc_encrypt.h>
 
 #ifdef __cplusplus
     extern "C" {
@@ -48,7 +49,11 @@
 
 /* Max number of certificates that PKCS7 structure can parse */
 #ifndef MAX_PKCS7_CERTS
+#ifdef OPENSSL_ALL
+    #define MAX_PKCS7_CERTS 15
+#else
     #define MAX_PKCS7_CERTS 4
+#endif
 #endif
 
 #ifndef MAX_ORI_TYPE_SZ
@@ -153,14 +158,6 @@ enum Pkcs7_Misc {
     MAX_RECIP_SZ          = MAX_VERSION_SZ +
                             MAX_SEQ_SZ + ASN_NAME_MAX + MAX_SN_SZ +
                             MAX_SEQ_SZ + MAX_ALGO_SZ + 1 + MAX_ENCRYPTED_KEY_SZ,
-#if (defined(HAVE_FIPS) && defined(HAVE_FIPS_VERSION) && \
-     (HAVE_FIPS_VERSION >= 2)) || defined(HAVE_SELFTEST)
-    /* In the event of fips cert 3389 or CAVP selftest build, these enums are
-     * not in aes.h for use with pkcs7 so enumerate it here outside the fips
-     * boundary */
-    GCM_NONCE_MID_SZ = 12, /* The usual default nonce size for AES-GCM. */
-    CCM_NONCE_MIN_SZ = 7,
-#endif
 };
 
 enum Cms_Options {
@@ -198,6 +195,7 @@ typedef struct PKCS7State PKCS7State;
 typedef struct Pkcs7Cert Pkcs7Cert;
 typedef struct Pkcs7EncodedRecip Pkcs7EncodedRecip;
 typedef struct PKCS7 PKCS7;
+typedef struct PKCS7 PKCS7_SIGNED;
 typedef struct PKCS7SignerInfo PKCS7SignerInfo;
 
 /* OtherRecipientInfo decrypt callback prototype */
@@ -219,8 +217,16 @@ typedef int (*CallbackWrapCEK)(PKCS7* pkcs7, byte* cek, word32 cekSz,
                                   byte* out, word32 outSz,
                                   int keyWrapAlgo, int type, int dir);
 
+#if defined(HAVE_PKCS7_RSA_RAW_SIGN_CALLBACK) && !defined(NO_RSA)
+/* RSA sign raw digest callback, user builds DigestInfo */
+typedef int (*CallbackRsaSignRawDigest)(PKCS7* pkcs7, byte* digest,
+                                   word32 digestSz, byte* out, word32 outSz,
+                                   byte* privateKey, word32 privateKeySz,
+                                   int devId, int hashOID);
+#endif
+
 /* Public Structure Warning:
- * Existing members must not be changed to maintain backwards compatibility! 
+ * Existing members must not be changed to maintain backwards compatibility!
  */
 struct PKCS7 {
     WC_RNG* rng;
@@ -267,7 +273,7 @@ struct PKCS7 {
     byte issuerSn[MAX_SN_SZ];     /* singleCert's serial number           */
     byte publicKey[MAX_RSA_INT_SZ + MAX_RSA_E_SZ]; /* MAX RSA key size (m + e)*/
     word32 certSz[MAX_PKCS7_CERTS];
-    
+
      /* flags - up to 16-bits */
     word16 isDynamic:1;
     word16 noDegenerate:1; /* allow degenerate case in verify function */
@@ -317,9 +323,16 @@ struct PKCS7 {
     word32 signatureSz;
     word32 plainDigestSz;
     word32 pkcs7DigestSz;
+
+#if defined(HAVE_PKCS7_RSA_RAW_SIGN_CALLBACK) && !defined(NO_RSA)
+    CallbackRsaSignRawDigest rsaSignRawDigestCb;
+#endif
+
+    /* used by DecodeEnvelopedData with multiple encrypted contents */
+    byte*  cachedEncryptedContent;
+    word32 cachedEncryptedContentSz;
     /* !! NEW DATA MEMBERS MUST BE ADDED AT END !! */
 };
-
 
 WOLFSSL_API PKCS7* wc_PKCS7_New(void* heap, int devId);
 WOLFSSL_API int  wc_PKCS7_Init(PKCS7* pkcs7, void* heap, int devId);
@@ -346,7 +359,7 @@ WOLFSSL_API int  wc_PKCS7_SetDetached(PKCS7* pkcs7, word16 flag);
 WOLFSSL_API int  wc_PKCS7_NoDefaultSignedAttribs(PKCS7* pkcs7);
 WOLFSSL_API int  wc_PKCS7_EncodeSignedData(PKCS7* pkcs7,
                                           byte* output, word32 outputSz);
-WOLFSSL_API int  wc_PKCS7_EncodeSignedData_ex(PKCS7* pkcs7, const byte* hashBuf, 
+WOLFSSL_API int  wc_PKCS7_EncodeSignedData_ex(PKCS7* pkcs7, const byte* hashBuf,
                                           word32 hashSz, byte* outputHead,
                                           word32* outputHeadSz,
                                           byte* outputFoot,
@@ -354,7 +367,7 @@ WOLFSSL_API int  wc_PKCS7_EncodeSignedData_ex(PKCS7* pkcs7, const byte* hashBuf,
 WOLFSSL_API void wc_PKCS7_AllowDegenerate(PKCS7* pkcs7, word16 flag);
 WOLFSSL_API int  wc_PKCS7_VerifySignedData(PKCS7* pkcs7,
                                           byte* pkiMsg, word32 pkiMsgSz);
-WOLFSSL_API int  wc_PKCS7_VerifySignedData_ex(PKCS7* pkcs7, const byte* hashBuf, 
+WOLFSSL_API int  wc_PKCS7_VerifySignedData_ex(PKCS7* pkcs7, const byte* hashBuf,
                                           word32 hashSz, byte* pkiMsgHead,
                                           word32 pkiMsgHeadSz, byte* pkiMsgFoot,
                                           word32 pkiMsgFootSz);
@@ -438,6 +451,11 @@ WOLFSSL_API int  wc_PKCS7_AddRecipient_ORI(PKCS7* pkcs7, CallbackOriEncrypt cb,
                                            int options);
 WOLFSSL_API int  wc_PKCS7_SetWrapCEKCb(PKCS7* pkcs7,
         CallbackWrapCEK wrapCEKCb);
+
+#if defined(HAVE_PKCS7_RSA_RAW_SIGN_CALLBACK) && !defined(NO_RSA)
+WOLFSSL_API int  wc_PKCS7_SetRsaSignRawDigestCb(PKCS7* pkcs7,
+        CallbackRsaSignRawDigest cb);
+#endif
 
 /* CMS/PKCS#7 EnvelopedData */
 WOLFSSL_API int  wc_PKCS7_EncodeEnvelopedData(PKCS7* pkcs7,

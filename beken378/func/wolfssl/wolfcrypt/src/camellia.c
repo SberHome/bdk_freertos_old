@@ -27,7 +27,7 @@
 
 /* camellia.c
  *
- * Copyright (C) 2006-2019 wolfSSL Inc.
+ * Copyright (C) 2006-2021 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -1548,7 +1548,7 @@ int wc_CamelliaSetKey(Camellia* cam, const byte* key, word32 len, const byte* iv
             ret = camellia_setup256(key, cam->key);
             break;
         default:
-            return BAD_FUNC_ARG;
+            ret = BAD_FUNC_ARG;
     }
 
     if (ret != 0)

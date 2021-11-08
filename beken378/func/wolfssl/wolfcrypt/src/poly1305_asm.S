@@ -1,6 +1,6 @@
 /* poly1305_asm
  *
- * Copyright (C) 2006-2019 wolfSSL Inc.
+ * Copyright (C) 2006-2021 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -22,21 +22,21 @@
 #ifndef HAVE_INTEL_AVX1
 #define HAVE_INTEL_AVX1
 #endif /* HAVE_INTEL_AVX1 */
-#ifndef HAVE_INTEL_AVX2
+#ifndef NO_AVX2_SUPPORT
 #define HAVE_INTEL_AVX2
-#endif /* HAVE_INTEL_AVX2 */
+#endif /* NO_AVX2_SUPPORT */
 
 #ifdef HAVE_INTEL_AVX1
 #ifndef __APPLE__
 .text
 .globl	poly1305_setkey_avx
 .type	poly1305_setkey_avx,@function
-.align	4
+.align	16
 poly1305_setkey_avx:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_setkey_avx
-.p2align	2
+.p2align	4
 _poly1305_setkey_avx:
 #endif /* __APPLE__ */
         movabsq	$0xffffffc0fffffff, %r10
@@ -91,12 +91,12 @@ _poly1305_setkey_avx:
 .text
 .globl	poly1305_block_avx
 .type	poly1305_block_avx,@function
-.align	4
+.align	16
 poly1305_block_avx:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_block_avx
-.p2align	2
+.p2align	4
 _poly1305_block_avx:
 #endif /* __APPLE__ */
         pushq	%r15
@@ -175,12 +175,12 @@ _poly1305_block_avx:
 .text
 .globl	poly1305_blocks_avx
 .type	poly1305_blocks_avx,@function
-.align	4
+.align	16
 poly1305_blocks_avx:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_blocks_avx
-.p2align	2
+.p2align	4
 _poly1305_blocks_avx:
 #endif /* __APPLE__ */
         pushq	%r15
@@ -263,12 +263,12 @@ L_poly1305_avx_blocks_start:
 .text
 .globl	poly1305_final_avx
 .type	poly1305_final_avx,@function
-.align	4
+.align	16
 poly1305_final_avx:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_final_avx
-.p2align	2
+.p2align	4
 _poly1305_final_avx:
 #endif /* __APPLE__ */
         pushq	%rbx
@@ -346,12 +346,12 @@ L_poly1305_avx_final_no_more:
 .text
 .globl	poly1305_calc_powers_avx2
 .type	poly1305_calc_powers_avx2,@function
-.align	4
+.align	16
 poly1305_calc_powers_avx2:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_calc_powers_avx2
-.p2align	2
+.p2align	4
 _poly1305_calc_powers_avx2:
 #endif /* __APPLE__ */
         pushq	%r12
@@ -418,6 +418,7 @@ _poly1305_calc_powers_avx2:
         movq	%r12, %rax
         shrq	$2, %rax
         leaq	0(%rax,%rax,4), %rax
+        andq	$3, %r12
         addq	%rax, %r10
         adcq	$0x00, %r11
         adcq	$0x00, %r12
@@ -613,12 +614,12 @@ _poly1305_calc_powers_avx2:
 .text
 .globl	poly1305_setkey_avx2
 .type	poly1305_setkey_avx2,@function
-.align	4
+.align	16
 poly1305_setkey_avx2:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_setkey_avx2
-.p2align	2
+.p2align	4
 _poly1305_setkey_avx2:
 #endif /* __APPLE__ */
 #ifndef __APPLE__
@@ -668,12 +669,12 @@ L_poly1305_avx2_blocks_hibit:
 .text
 .globl	poly1305_blocks_avx2
 .type	poly1305_blocks_avx2,@function
-.align	4
+.align	16
 poly1305_blocks_avx2:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_blocks_avx2
-.p2align	2
+.p2align	4
 _poly1305_blocks_avx2:
 #endif /* __APPLE__ */
         pushq	%r12
@@ -1002,7 +1003,7 @@ L_poly1305_avx2_blocks_end_calc:
         shlq	$40, %r12
         addq	%r9, %rax
         adcq	%r10, %rax
-        addq	%r11, %rdx
+        adcq	%r11, %rdx
         adcq	%r12, %rdx
         adcq	$0x00, %rcx
         movq	%rcx, %r8
@@ -1028,12 +1029,12 @@ L_poly1305_avx2_blocks_complete:
 .text
 .globl	poly1305_final_avx2
 .type	poly1305_final_avx2,@function
-.align	4
+.align	16
 poly1305_final_avx2:
 #else
 .section	__TEXT,__text
 .globl	_poly1305_final_avx2
-.p2align	2
+.p2align	4
 _poly1305_final_avx2:
 #endif /* __APPLE__ */
         movb	$0x01, 616(%rdi)
@@ -1102,3 +1103,7 @@ L_poly1305_avx2_final_cmp_copy:
 .size	poly1305_final_avx2,.-poly1305_final_avx2
 #endif /* __APPLE__ */
 #endif /* HAVE_INTEL_AVX2 */
+
+#if defined(__linux__) && defined(__ELF__)
+.section	.note.GNU-stack,"",%progbits
+#endif

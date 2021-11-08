@@ -1,6 +1,6 @@
 /* wc_encrypt.c
  *
- * Copyright (C) 2006-2019 wolfSSL Inc.
+ * Copyright (C) 2006-2021 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -28,6 +28,7 @@
 #include <wolfssl/wolfcrypt/aes.h>
 #include <wolfssl/wolfcrypt/des3.h>
 #include <wolfssl/wolfcrypt/hash.h>
+#include <wolfssl/wolfcrypt/rc2.h>
 #include <wolfssl/wolfcrypt/arc4.h>
 #include <wolfssl/wolfcrypt/wc_encrypt.h>
 #include <wolfssl/wolfcrypt/error-crypt.h>
@@ -87,7 +88,7 @@ int wc_AesCbcEncryptWithKey(byte* out, const byte* in, word32 inSz,
 {
     int  ret = 0;
 #ifdef WOLFSSL_SMALL_STACK
-    Aes* aes = NULL;
+    Aes* aes;
 #else
     Aes  aes[1];
 #endif
@@ -122,7 +123,7 @@ int wc_Des_CbcEncryptWithKey(byte* out, const byte* in, word32 sz,
 {
     int ret  = 0;
 #ifdef WOLFSSL_SMALL_STACK
-    Des* des = NULL;
+    Des* des;
 #else
     Des  des[1];
 #endif
@@ -149,7 +150,7 @@ int wc_Des_CbcDecryptWithKey(byte* out, const byte* in, word32 sz,
 {
     int ret  = 0;
 #ifdef WOLFSSL_SMALL_STACK
-    Des* des = NULL;
+    Des* des;
 #else
     Des  des[1];
 #endif
@@ -177,7 +178,7 @@ int wc_Des3_CbcEncryptWithKey(byte* out, const byte* in, word32 sz,
 {
     int ret    = 0;
 #ifdef WOLFSSL_SMALL_STACK
-    Des3* des3 = NULL;
+    Des3* des3;
 #else
     Des3  des3[1];
 #endif
@@ -209,7 +210,7 @@ int wc_Des3_CbcDecryptWithKey(byte* out, const byte* in, word32 sz,
 {
     int ret    = 0;
 #ifdef WOLFSSL_SMALL_STACK
-    Des3* des3 = NULL;
+    Des3* des3;
 #else
     Des3  des3[1];
 #endif
@@ -238,7 +239,7 @@ int wc_Des3_CbcDecryptWithKey(byte* out, const byte* in, word32 sz,
 #endif /* !NO_DES3 */
 
 
-#ifdef WOLFSSL_ENCRYPTED_KEYS
+#if !defined(NO_ASN) && defined(WOLFSSL_ENCRYPTED_KEYS)
 
 int wc_BufferKeyDecrypt(EncryptedInfo* info, byte* der, word32 derSz,
     const byte* password, int passwordSz, int hashType)
@@ -360,10 +361,10 @@ int wc_BufferKeyEncrypt(EncryptedInfo* info, byte* der, word32 derSz,
     return ret;
 }
 
-#endif /* WOLFSSL_ENCRYPTED_KEYS */
+#endif /* !NO_ASN && WOLFSSL_ENCRYPTED_KEYS */
 
 
-#ifndef NO_PWDBASED
+#if !defined(NO_PWDBASED) && !defined(NO_ASN)
 
 #if defined(HAVE_PKCS8) || defined(HAVE_PKCS12)
 /* Decrypt/Encrypt input in place from parameters based on id
@@ -372,10 +373,10 @@ int wc_BufferKeyEncrypt(EncryptedInfo* info, byte* der, word32 derSz,
  */
 int wc_CryptKey(const char* password, int passwordSz, byte* salt,
                       int saltSz, int iterations, int id, byte* input,
-                      int length, int version, byte* cbcIv, int enc)
+                      int length, int version, byte* cbcIv, int enc, int shaOid)
 {
-    int typeH;
-    int derivedLen;
+    int typeH = WC_HASH_TYPE_NONE;
+    int derivedLen = 0;
     int ret = 0;
 #ifdef WOLFSSL_SMALL_STACK
     byte* key;
@@ -404,9 +405,17 @@ int wc_CryptKey(const char* password, int passwordSz, byte* salt,
             break;
 
         case PBE_SHA1_DES3:
-            typeH = WC_SHA;
-            derivedLen = 32;           /* may need iv for v1.5 */
-            break;
+            switch(shaOid) {
+                case HMAC_SHA256_OID:
+                    typeH = WC_SHA256;
+                    derivedLen = 32;
+                    break;
+                default:
+                    typeH = WC_SHA;
+                    derivedLen = 32;           /* may need iv for v1.5 */
+                    break;
+            }
+        break;
         #endif /* !NO_SHA */
     #endif /* !NO_DES3 */
     #if !defined(NO_SHA) && !defined(NO_RC4)
@@ -415,14 +424,47 @@ int wc_CryptKey(const char* password, int passwordSz, byte* salt,
             derivedLen = 16;
             break;
     #endif
-    #ifdef WOLFSSL_AES_256
+    #if defined(WOLFSSL_AES_256)
         case PBE_AES256_CBC:
-            typeH = WC_SHA256;
-            derivedLen = 32;
+            switch(shaOid) {
+                case HMAC_SHA256_OID:
+                    typeH = WC_SHA256;
+                    derivedLen = 32;
+                    break;
+            #ifndef NO_SHA
+                default:
+                    typeH = WC_SHA;
+                    derivedLen = 32;
+                    break;
+            #endif
+            }
+            break;
+    #endif /* WOLFSSL_AES_256 && !NO_SHA */
+    #if defined(WOLFSSL_AES_128)
+        case PBE_AES128_CBC:
+            switch(shaOid) {
+                case HMAC_SHA256_OID:
+                    typeH = WC_SHA256;
+                    derivedLen = 16;
+                    break;
+            #ifndef NO_SHA
+                default:
+                    typeH = WC_SHA;
+                    derivedLen = 16;
+                    break;
+            #endif
+            }
+            break;
+    #endif /* WOLFSSL_AES_128 && !NO_SHA */
+    #ifdef WC_RC2
+        case PBE_SHA1_40RC2_CBC:
+            typeH = WC_SHA;
+            derivedLen = 5;
             break;
     #endif
         default:
             WOLFSSL_MSG("Unknown/Unsupported encrypt/decrypt id");
+            (void)shaOid;
             return ALGO_ID_E;
     }
 
@@ -440,11 +482,13 @@ int wc_CryptKey(const char* password, int passwordSz, byte* salt,
         ret = wc_PBKDF1(key, (byte*)password, passwordSz,
                         salt, saltSz, iterations, derivedLen, typeH);
 #endif
+#ifdef HAVE_PKCS12
     else if (version == PKCS12v1) {
         int  i, idx = 0;
         byte unicodePasswd[MAX_UNICODE_SZ];
 
         if ( (passwordSz * 2 + 2) > (int)sizeof(unicodePasswd)) {
+            ForceZero(key, MAX_KEY_SIZE);
 #ifdef WOLFSSL_SMALL_STACK
             XFREE(key, NULL, DYNAMIC_TYPE_TMP_BUFFER);
 #endif
@@ -465,7 +509,9 @@ int wc_CryptKey(const char* password, int passwordSz, byte* salt,
             ret += wc_PKCS12_PBKDF(cbcIv, unicodePasswd, idx, salt, saltSz,
                                 iterations, 8, typeH, 2);
     }
+#endif /* HAVE_PKCS12 */
     else {
+        ForceZero(key, MAX_KEY_SIZE);
 #ifdef WOLFSSL_SMALL_STACK
         XFREE(key, NULL, DYNAMIC_TYPE_TMP_BUFFER);
 #endif
@@ -474,6 +520,7 @@ int wc_CryptKey(const char* password, int passwordSz, byte* salt,
     }
 
     if (ret != 0) {
+        ForceZero(key, MAX_KEY_SIZE);
 #ifdef WOLFSSL_SMALL_STACK
         XFREE(key, NULL, DYNAMIC_TYPE_TMP_BUFFER);
 #endif
@@ -499,6 +546,7 @@ int wc_CryptKey(const char* password, int passwordSz, byte* salt,
                 ret = wc_Des_SetKey(&des, key, desIv, DES_DECRYPTION);
             }
             if (ret != 0) {
+                ForceZero(key, MAX_KEY_SIZE);
 #ifdef WOLFSSL_SMALL_STACK
                 XFREE(key, NULL, DYNAMIC_TYPE_TMP_BUFFER);
 #endif
@@ -526,6 +574,7 @@ int wc_CryptKey(const char* password, int passwordSz, byte* salt,
 
             ret = wc_Des3Init(&des, NULL, INVALID_DEVID);
             if (ret != 0) {
+                ForceZero(key, MAX_KEY_SIZE);
 #ifdef WOLFSSL_SMALL_STACK
                 XFREE(key, NULL, DYNAMIC_TYPE_TMP_BUFFER);
 #endif
@@ -538,6 +587,7 @@ int wc_CryptKey(const char* password, int passwordSz, byte* salt,
                 ret = wc_Des3_SetKey(&des, key, desIv, DES_DECRYPTION);
             }
             if (ret != 0) {
+                ForceZero(key, MAX_KEY_SIZE);
 #ifdef WOLFSSL_SMALL_STACK
                 XFREE(key, NULL, DYNAMIC_TYPE_TMP_BUFFER);
 #endif
@@ -550,6 +600,7 @@ int wc_CryptKey(const char* password, int passwordSz, byte* salt,
                 ret = wc_Des3_CbcDecrypt(&des, input, input, length);
             }
             if (ret != 0) {
+                ForceZero(key, MAX_KEY_SIZE);
 #ifdef WOLFSSL_SMALL_STACK
                 XFREE(key, NULL, DYNAMIC_TYPE_TMP_BUFFER);
 #endif
@@ -572,38 +623,74 @@ int wc_CryptKey(const char* password, int passwordSz, byte* salt,
 #if !defined(NO_AES) && defined(HAVE_AES_CBC)
     #ifdef WOLFSSL_AES_256
         case PBE_AES256_CBC:
+        case PBE_AES128_CBC:
         {
-            Aes aes;
-            ret = wc_AesInit(&aes, NULL, INVALID_DEVID);
+#ifdef WOLFSSL_SMALL_STACK
+            Aes *aes;
+            aes = (Aes *)XMALLOC(sizeof *aes, NULL, DYNAMIC_TYPE_AES);
+            if (aes == NULL)
+                return MEMORY_E;
+#else
+            Aes aes[1];
+#endif
+            ret = wc_AesInit(aes, NULL, INVALID_DEVID);
             if (ret == 0) {
                 if (enc) {
-                    ret = wc_AesSetKey(&aes, key, derivedLen, cbcIv,
+                    ret = wc_AesSetKey(aes, key, derivedLen, cbcIv,
                                                                 AES_ENCRYPTION);
                 }
                 else {
-                    ret = wc_AesSetKey(&aes, key, derivedLen, cbcIv,
+                    ret = wc_AesSetKey(aes, key, derivedLen, cbcIv,
                                                                 AES_DECRYPTION);
                 }
             }
             if (ret == 0) {
                 if (enc)
-                    ret = wc_AesCbcEncrypt(&aes, input, input, length);
+                    ret = wc_AesCbcEncrypt(aes, input, input, length);
                 else
-                    ret = wc_AesCbcDecrypt(&aes, input, input, length);
+                    ret = wc_AesCbcDecrypt(aes, input, input, length);
             }
+            ForceZero(aes, sizeof(Aes));
+#ifdef WOLFSSL_SMALL_STACK
+            XFREE(aes, NULL, DYNAMIC_TYPE_AES);
+#endif
             if (ret != 0) {
+                ForceZero(key, MAX_KEY_SIZE);
 #ifdef WOLFSSL_SMALL_STACK
                 XFREE(key, NULL, DYNAMIC_TYPE_TMP_BUFFER);
 #endif
                 return ret;
             }
-            ForceZero(&aes, sizeof(Aes));
             break;
         }
     #endif /* WOLFSSL_AES_256 */
 #endif /* !NO_AES && HAVE_AES_CBC */
+#ifdef WC_RC2
+        case PBE_SHA1_40RC2_CBC:
+        {
+            Rc2 rc2;
+            /* effective key size for RC2-40-CBC is 40 bits */
+            ret = wc_Rc2SetKey(&rc2, key, derivedLen, cbcIv, 40);
+            if (ret == 0) {
+                if (enc)
+                    ret = wc_Rc2CbcEncrypt(&rc2, input, input, length);
+                else
+                    ret = wc_Rc2CbcDecrypt(&rc2, input, input, length);
+            }
+            if (ret != 0) {
+                ForceZero(key, MAX_KEY_SIZE);
+#ifdef WOLFSSL_SMALL_STACK
+                XFREE(key, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+#endif
+                return ret;
+            }
+            ForceZero(&rc2, sizeof(Rc2));
+            break;
+        }
+#endif
 
         default:
+            ForceZero(key, MAX_KEY_SIZE);
 #ifdef WOLFSSL_SMALL_STACK
             XFREE(key, NULL, DYNAMIC_TYPE_TMP_BUFFER);
 #endif
@@ -611,6 +698,7 @@ int wc_CryptKey(const char* password, int passwordSz, byte* salt,
             return ALGO_ID_E;
     }
 
+    ForceZero(key, MAX_KEY_SIZE);
 #ifdef WOLFSSL_SMALL_STACK
     XFREE(key, NULL, DYNAMIC_TYPE_TMP_BUFFER);
 #endif

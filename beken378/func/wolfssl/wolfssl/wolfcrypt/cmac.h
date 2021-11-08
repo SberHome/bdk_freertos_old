@@ -1,6 +1,6 @@
 /* cmac.h
  *
- * Copyright (C) 2006-2019 wolfSSL Inc.
+ * Copyright (C) 2006-2021 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -41,7 +41,11 @@
 #if !defined(HAVE_FIPS) || \
     (defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 2))
 
-typedef struct Cmac {
+#ifndef WC_CMAC_TYPE_DEFINED
+    typedef struct Cmac Cmac;
+    #define WC_CMAC_TYPE_DEFINED
+#endif
+struct Cmac {
     Aes aes;
     byte buffer[AES_BLOCK_SIZE]; /* partially stored block */
     byte digest[AES_BLOCK_SIZE]; /* running digest */
@@ -49,7 +53,18 @@ typedef struct Cmac {
     byte k2[AES_BLOCK_SIZE];
     word32 bufferSz;
     word32 totalSz;
-} Cmac;
+#ifdef WOLF_CRYPTO_CB
+    int devId;
+    void* devCtx;
+    #ifdef WOLFSSL_QNX_CAAM
+    byte ctx[32]; /* hold state for save and return */
+    word32 blackKey;
+    word32 keylen;
+    byte   initialized;
+    #endif
+#endif
+};
+
 
 
 typedef enum CmacType {
@@ -65,6 +80,12 @@ WOLFSSL_API
 int wc_InitCmac(Cmac* cmac,
                 const byte* key, word32 keySz,
                 int type, void* unused);
+
+WOLFSSL_API
+int wc_InitCmac_ex(Cmac* cmac,
+                const byte* key, word32 keySz,
+                int type, void* unused, void* heap, int devId);
+
 WOLFSSL_API
 int wc_CmacUpdate(Cmac* cmac,
                   const byte* in, word32 inSz);

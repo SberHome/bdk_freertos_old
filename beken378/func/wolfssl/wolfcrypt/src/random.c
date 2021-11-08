@@ -1107,8 +1107,9 @@ const byte outputB[] = {
     0xd4, 0x31, 0xf4, 0xc9, 0xf7, 0x04, 0x27, 0xdf
 };
 
-
-__maybe_unused static int wc_RNG_HealthTestLocal(int reseed)
+#warning "I deleted __maybe_unused to quickly fix problem"
+// __maybe_unused static int wc_RNG_HealthTestLocal(int reseed)
+static int wc_RNG_HealthTestLocal(int reseed)
 {
     int ret = 0;
 #ifdef WOLFSSL_SMALL_STACK

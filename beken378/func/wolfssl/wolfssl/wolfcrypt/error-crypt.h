@@ -1,6 +1,6 @@
 /* error-crypt.h
  *
- * Copyright (C) 2006-2019 wolfSSL Inc.
+ * Copyright (C) 2006-2021 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -21,6 +21,11 @@
 
 /*!
     \file wolfssl/wolfcrypt/error-crypt.h
+*/
+/*
+DESCRIPTION
+This library defines error codes and contians routines for setting and examining
+the error status.
 */
 
 #ifndef WOLF_CRYPT_ERROR_H
@@ -98,7 +103,6 @@ enum {
     ASN_SIG_HASH_E     = -156,  /* ASN sig error, unsupported hash type */
     ASN_SIG_KEY_E      = -157,  /* ASN sig error, unsupported key type */
     ASN_DH_KEY_E       = -158,  /* ASN key init error, invalid input */
-    ASN_NTRU_KEY_E     = -159,  /* ASN ntru key decode error, invalid input */
     ASN_CRIT_EXT_E     = -160,  /* ASN unsupported critical extension */
     ASN_ALT_NAME_E     = -161,  /* ASN alternate name error */
     ASN_NO_PEM_HEADER  = -162,  /* ASN no PEM header found */
@@ -112,6 +116,7 @@ enum {
     NO_PASSWORD        = -176,  /* no password provided by user */
     ALT_NAME_E         = -177,  /* alt name size problem, too big */
     BAD_OCSP_RESPONDER = -178,  /* missing key usage extensions */
+    CRL_CERT_DATE_ERR  = -179,   /* CRL date error */
 
     AES_GCM_AUTH_E     = -180,  /* AES-GCM Authentication check failure */
     AES_CCM_AUTH_E     = -181,  /* AES-CCM Authentication check failure */
@@ -199,7 +204,7 @@ enum {
     WC_HW_E             = -248,  /* Error with hardware crypto use */
     WC_HW_WAIT_E        = -249,  /* Hardware waiting on resource */
 
-    PSS_SALTLEN_E       = -250,  /* PSS length of salt is to long for hash */
+    PSS_SALTLEN_E       = -250,  /* PSS length of salt is too long for hash */
     PRIME_GEN_E         = -251,  /* Failure finding a prime. */
     BER_INDEF_E         = -252,  /* Cannot decode indefinite length BER. */
     RSA_OUT_OF_RANGE_E  = -253,  /* Ciphertext to decrypt out of range. */
@@ -224,10 +229,25 @@ enum {
     PKCS7_NO_SIGNER_E   = -269,  /* No signer in PKCS#7 signed data msg */
     WC_PKCS7_WANT_READ_E= -270,  /* PKCS7 operations wants more input */
 
-    CRYPTOCB_UNAVAILABLE= -271, /* Crypto callback unavailable */
-    PKCS7_SIGNEEDS_CHECK= -272, /* signature needs verified by caller */
+    CRYPTOCB_UNAVAILABLE= -271,  /* Crypto callback unavailable */
+    PKCS7_SIGNEEDS_CHECK= -272,  /* signature needs verified by caller */
+    PSS_SALTLEN_RECOVER_E=-273,  /* PSS slat length not recoverable */
+    CHACHA_POLY_OVERFLOW =-274,  /* ChaCha20Poly1305 limit overflow */
+    ASN_SELF_SIGNED_E   = -275,  /* ASN self-signed certificate error */
+    SAKKE_VERIFY_FAIL_E = -276,  /* SAKKE derivation verification error */
+    MISSING_IV          = -277,  /* IV was not set */
+    MISSING_KEY         = -278,  /* Key was not set */
+    BAD_LENGTH_E        = -279,  /* Value of length parameter is invalid. */
+    ECDSA_KAT_FIPS_E    = -280,  /* ECDSA KAT failure */
+    RSA_PAT_FIPS_E      = -281,  /* RSA Pairwise failure */
+    KDF_TLS12_KAT_FIPS_E = -282,  /* TLS12 KDF KAT failure */
+    KDF_TLS13_KAT_FIPS_E = -283,  /* TLS13 KDF KAT failure */
+    KDF_SSH_KAT_FIPS_E  = -284,  /* SSH KDF KAT failure */
+    DHE_PCT_E           = -285,  /* DHE Pairwise Consistency Test failure */
+    ECC_PCT_E           = -286,  /* ECDHE Pairwise Consistency Test failure */
+    FIPS_PRIVATE_KEY_LOCKED_E = -287, /* Cannot export private key. */
 
-    WC_LAST_E           = -272,  /* Update this to indicate last error */
+    WC_LAST_E           = -287,  /* Update this to indicate last error */
     MIN_CODE_E          = -300   /* errors -101 - -299 */
 
     /* add new companion error id strings for any new error codes

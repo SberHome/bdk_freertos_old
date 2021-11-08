@@ -1,6 +1,6 @@
 /* fe_x25519_asm
  *
- * Copyright (C) 2006-2018 wolfSSL Inc.
+ * Copyright (C) 2006-2021 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -30,16 +30,21 @@
 .text
 .globl	fe_init
 .type	fe_init,@function
-.align	4
+.align	16
 fe_init:
 #else
 .section	__TEXT,__text
 .globl	_fe_init
-.p2align	2
+.p2align	4
 _fe_init:
 #endif /* __APPLE__ */
 #ifdef HAVE_INTEL_AVX2
-        movl	cpuFlagsSet(%rip), %eax
+#ifndef __APPLE__
+        movq	cpuFlagsSet@GOTPCREL(%rip), %rax
+        movl	(%rax), %eax
+#else
+        movl	_cpuFlagsSet(%rip), %eax
+#endif /* __APPLE__ */
         testl	%eax, %eax
         je	L_fe_init_get_flags
         repz retq
@@ -49,96 +54,176 @@ L_fe_init_get_flags:
 #else
         callq	_cpuid_get_flags
 #endif /* __APPLE__ */
-        movl	%eax, intelFlags(%rip)
+#ifndef __APPLE__
+        movq	intelFlags@GOTPCREL(%rip), %rdx
+        movl	%eax, (%rdx)
+#else
+        movl	%eax, _intelFlags(%rip)
+#endif /* __APPLE__ */
         andl	$0x50, %eax
         cmpl	$0x50, %eax
         jne	L_fe_init_flags_done
 #ifndef __APPLE__
         movq	fe_mul_avx2@GOTPCREL(%rip), %rax
 #else
-        movq	fe_mul_avx2(%rip), %rax
+        leaq	_fe_mul_avx2(%rip), %rax
 #endif /* __APPLE__ */
-        movq	%rax, fe_mul_p(%rip)
+#ifndef __APPLE__
+        movq	fe_mul_p@GOTPCREL(%rip), %rdx
+        movq	%rax, (%rdx)
+#else
+        movq	%rax, _fe_mul_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
         movq	fe_sq_avx2@GOTPCREL(%rip), %rax
 #else
-        movq	fe_sq_avx2(%rip), %rax
+        leaq	_fe_sq_avx2(%rip), %rax
 #endif /* __APPLE__ */
-        movq	%rax, fe_sq_p(%rip)
+#ifndef __APPLE__
+        movq	fe_sq_p@GOTPCREL(%rip), %rdx
+        movq	%rax, (%rdx)
+#else
+        movq	%rax, _fe_sq_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
         movq	fe_mul121666_avx2@GOTPCREL(%rip), %rax
 #else
-        movq	fe_mul121666_avx2(%rip), %rax
+        leaq	_fe_mul121666_avx2(%rip), %rax
 #endif /* __APPLE__ */
-        movq	%rax, fe_mul121666_p(%rip)
+#ifndef __APPLE__
+        movq	fe_mul121666_p@GOTPCREL(%rip), %rdx
+        movq	%rax, (%rdx)
+#else
+        movq	%rax, _fe_mul121666_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
         movq	fe_sq2_avx2@GOTPCREL(%rip), %rax
 #else
-        movq	fe_sq2_avx2(%rip), %rax
+        leaq	_fe_sq2_avx2(%rip), %rax
 #endif /* __APPLE__ */
-        movq	%rax, fe_sq2_p(%rip)
+#ifndef __APPLE__
+        movq	fe_sq2_p@GOTPCREL(%rip), %rdx
+        movq	%rax, (%rdx)
+#else
+        movq	%rax, _fe_sq2_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
         movq	fe_invert_avx2@GOTPCREL(%rip), %rax
 #else
-        movq	fe_invert_avx2(%rip), %rax
+        leaq	_fe_invert_avx2(%rip), %rax
 #endif /* __APPLE__ */
-        movq	%rax, fe_invert_p(%rip)
+#ifndef __APPLE__
+        movq	fe_invert_p@GOTPCREL(%rip), %rdx
+        movq	%rax, (%rdx)
+#else
+        movq	%rax, _fe_invert_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
         movq	curve25519_avx2@GOTPCREL(%rip), %rax
 #else
-        movq	curve25519_avx2(%rip), %rax
+        leaq	_curve25519_avx2(%rip), %rax
 #endif /* __APPLE__ */
-        movq	%rax, curve25519_p(%rip)
+#ifndef __APPLE__
+        movq	curve25519_p@GOTPCREL(%rip), %rdx
+        movq	%rax, (%rdx)
+#else
+        movq	%rax, _curve25519_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
         movq	fe_pow22523_avx2@GOTPCREL(%rip), %rax
 #else
-        movq	fe_pow22523_avx2(%rip), %rax
+        leaq	_fe_pow22523_avx2(%rip), %rax
 #endif /* __APPLE__ */
-        movq	%rax, fe_pow22523_p(%rip)
+#ifndef __APPLE__
+        movq	fe_pow22523_p@GOTPCREL(%rip), %rdx
+        movq	%rax, (%rdx)
+#else
+        movq	%rax, _fe_pow22523_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
         movq	fe_ge_to_p2_avx2@GOTPCREL(%rip), %rax
 #else
-        movq	fe_ge_to_p2_avx2(%rip), %rax
+        leaq	_fe_ge_to_p2_avx2(%rip), %rax
 #endif /* __APPLE__ */
-        movq	%rax, fe_ge_to_p2_p(%rip)
+#ifndef __APPLE__
+        movq	fe_ge_to_p2_p@GOTPCREL(%rip), %rdx
+        movq	%rax, (%rdx)
+#else
+        movq	%rax, _fe_ge_to_p2_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
         movq	fe_ge_to_p3_avx2@GOTPCREL(%rip), %rax
 #else
-        movq	fe_ge_to_p3_avx2(%rip), %rax
+        leaq	_fe_ge_to_p3_avx2(%rip), %rax
 #endif /* __APPLE__ */
-        movq	%rax, fe_ge_to_p3_p(%rip)
+#ifndef __APPLE__
+        movq	fe_ge_to_p3_p@GOTPCREL(%rip), %rdx
+        movq	%rax, (%rdx)
+#else
+        movq	%rax, _fe_ge_to_p3_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
         movq	fe_ge_dbl_avx2@GOTPCREL(%rip), %rax
 #else
-        movq	fe_ge_dbl_avx2(%rip), %rax
+        leaq	_fe_ge_dbl_avx2(%rip), %rax
 #endif /* __APPLE__ */
-        movq	%rax, fe_ge_dbl_p(%rip)
+#ifndef __APPLE__
+        movq	fe_ge_dbl_p@GOTPCREL(%rip), %rdx
+        movq	%rax, (%rdx)
+#else
+        movq	%rax, _fe_ge_dbl_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
         movq	fe_ge_madd_avx2@GOTPCREL(%rip), %rax
 #else
-        movq	fe_ge_madd_avx2(%rip), %rax
+        leaq	_fe_ge_madd_avx2(%rip), %rax
 #endif /* __APPLE__ */
-        movq	%rax, fe_ge_madd_p(%rip)
+#ifndef __APPLE__
+        movq	fe_ge_madd_p@GOTPCREL(%rip), %rdx
+        movq	%rax, (%rdx)
+#else
+        movq	%rax, _fe_ge_madd_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
         movq	fe_ge_msub_avx2@GOTPCREL(%rip), %rax
 #else
-        movq	fe_ge_msub_avx2(%rip), %rax
+        leaq	_fe_ge_msub_avx2(%rip), %rax
 #endif /* __APPLE__ */
-        movq	%rax, fe_ge_msub_p(%rip)
+#ifndef __APPLE__
+        movq	fe_ge_msub_p@GOTPCREL(%rip), %rdx
+        movq	%rax, (%rdx)
+#else
+        movq	%rax, _fe_ge_msub_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
         movq	fe_ge_add_avx2@GOTPCREL(%rip), %rax
 #else
-        movq	fe_ge_add_avx2(%rip), %rax
+        leaq	_fe_ge_add_avx2(%rip), %rax
 #endif /* __APPLE__ */
-        movq	%rax, fe_ge_add_p(%rip)
+#ifndef __APPLE__
+        movq	fe_ge_add_p@GOTPCREL(%rip), %rdx
+        movq	%rax, (%rdx)
+#else
+        movq	%rax, _fe_ge_add_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
         movq	fe_ge_sub_avx2@GOTPCREL(%rip), %rax
 #else
-        movq	fe_ge_sub_avx2(%rip), %rax
+        leaq	_fe_ge_sub_avx2(%rip), %rax
 #endif /* __APPLE__ */
-        movq	%rax, fe_ge_sub_p(%rip)
+#ifndef __APPLE__
+        movq	fe_ge_sub_p@GOTPCREL(%rip), %rdx
+        movq	%rax, (%rdx)
+#else
+        movq	%rax, _fe_ge_sub_p(%rip)
+#endif /* __APPLE__ */
 L_fe_init_flags_done:
-        movl	$0x01, cpuFlagsSet(%rip)
+#ifndef __APPLE__
+        movq	cpuFlagsSet@GOTPCREL(%rip), %rdx
+        movl	$0x1, (%rdx)
+#else
+        movl	$0x1, _cpuFlagsSet(%rip)
+#endif /* __APPLE__ */
 #endif /* HAVE_INTEL_AVX2 */
         repz retq
 #ifndef __APPLE__
@@ -148,12 +233,12 @@ L_fe_init_flags_done:
 .text
 .globl	fe_frombytes
 .type	fe_frombytes,@function
-.align	4
+.align	16
 fe_frombytes:
 #else
 .section	__TEXT,__text
 .globl	_fe_frombytes
-.p2align	2
+.p2align	4
 _fe_frombytes:
 #endif /* __APPLE__ */
         movq	$0x7fffffffffffffff, %r9
@@ -174,12 +259,12 @@ _fe_frombytes:
 .text
 .globl	fe_tobytes
 .type	fe_tobytes,@function
-.align	4
+.align	16
 fe_tobytes:
 #else
 .section	__TEXT,__text
 .globl	_fe_tobytes
-.p2align	2
+.p2align	4
 _fe_tobytes:
 #endif /* __APPLE__ */
         movq	$0x7fffffffffffffff, %r10
@@ -214,12 +299,12 @@ _fe_tobytes:
 .text
 .globl	fe_1
 .type	fe_1,@function
-.align	4
+.align	16
 fe_1:
 #else
 .section	__TEXT,__text
 .globl	_fe_1
-.p2align	2
+.p2align	4
 _fe_1:
 #endif /* __APPLE__ */
         # Set one
@@ -235,12 +320,12 @@ _fe_1:
 .text
 .globl	fe_0
 .type	fe_0,@function
-.align	4
+.align	16
 fe_0:
 #else
 .section	__TEXT,__text
 .globl	_fe_0
-.p2align	2
+.p2align	4
 _fe_0:
 #endif /* __APPLE__ */
         # Set zero
@@ -256,12 +341,12 @@ _fe_0:
 .text
 .globl	fe_copy
 .type	fe_copy,@function
-.align	4
+.align	16
 fe_copy:
 #else
 .section	__TEXT,__text
 .globl	_fe_copy
-.p2align	2
+.p2align	4
 _fe_copy:
 #endif /* __APPLE__ */
         # Copy
@@ -279,53 +364,14 @@ _fe_copy:
 #endif /* __APPLE__ */
 #ifndef __APPLE__
 .text
-.globl	fe_cswap
-.type	fe_cswap,@function
-.align	4
-fe_cswap:
-#else
-.section	__TEXT,__text
-.globl	_fe_cswap
-.p2align	2
-_fe_cswap:
-#endif /* __APPLE__ */
-        # Conditional Swap
-        movslq	%edx, %rax
-        movq	(%rdi), %rcx
-        movq	8(%rdi), %r8
-        movq	16(%rdi), %r9
-        movq	24(%rdi), %r10
-        negq	%rax
-        xorq	(%rsi), %rcx
-        xorq	8(%rsi), %r8
-        xorq	16(%rsi), %r9
-        xorq	24(%rsi), %r10
-        andq	%rax, %rcx
-        andq	%rax, %r8
-        andq	%rax, %r9
-        andq	%rax, %r10
-        xorq	%rcx, (%rdi)
-        xorq	%r8, 8(%rdi)
-        xorq	%r9, 16(%rdi)
-        xorq	%r10, 24(%rdi)
-        xorq	%rcx, (%rsi)
-        xorq	%r8, 8(%rsi)
-        xorq	%r9, 16(%rsi)
-        xorq	%r10, 24(%rsi)
-        repz retq
-#ifndef __APPLE__
-.size	fe_cswap,.-fe_cswap
-#endif /* __APPLE__ */
-#ifndef __APPLE__
-.text
 .globl	fe_sub
 .type	fe_sub,@function
-.align	4
+.align	16
 fe_sub:
 #else
 .section	__TEXT,__text
 .globl	_fe_sub
-.p2align	2
+.p2align	4
 _fe_sub:
 #endif /* __APPLE__ */
         pushq	%r12
@@ -363,12 +409,12 @@ _fe_sub:
 .text
 .globl	fe_add
 .type	fe_add,@function
-.align	4
+.align	16
 fe_add:
 #else
 .section	__TEXT,__text
 .globl	_fe_add
-.p2align	2
+.p2align	4
 _fe_add:
 #endif /* __APPLE__ */
         pushq	%r12
@@ -406,12 +452,12 @@ _fe_add:
 .text
 .globl	fe_neg
 .type	fe_neg,@function
-.align	4
+.align	16
 fe_neg:
 #else
 .section	__TEXT,__text
 .globl	_fe_neg
-.p2align	2
+.p2align	4
 _fe_neg:
 #endif /* __APPLE__ */
         movq	$-19, %rdx
@@ -419,9 +465,9 @@ _fe_neg:
         movq	$-1, %rcx
         movq	$0x7fffffffffffffff, %r8
         subq	(%rsi), %rdx
-        subq	8(%rsi), %rax
-        subq	16(%rsi), %rcx
-        subq	24(%rsi), %r8
+        sbbq	8(%rsi), %rax
+        sbbq	16(%rsi), %rcx
+        sbbq	24(%rsi), %r8
         movq	%rdx, (%rdi)
         movq	%rax, 8(%rdi)
         movq	%rcx, 16(%rdi)
@@ -434,12 +480,12 @@ _fe_neg:
 .text
 .globl	fe_cmov
 .type	fe_cmov,@function
-.align	4
+.align	16
 fe_cmov:
 #else
 .section	__TEXT,__text
 .globl	_fe_cmov
-.p2align	2
+.p2align	4
 _fe_cmov:
 #endif /* __APPLE__ */
         cmpl	$0x01, %edx
@@ -463,12 +509,12 @@ _fe_cmov:
 .text
 .globl	fe_isnonzero
 .type	fe_isnonzero,@function
-.align	4
+.align	16
 fe_isnonzero:
 #else
 .section	__TEXT,__text
 .globl	_fe_isnonzero
-.p2align	2
+.p2align	4
 _fe_isnonzero:
 #endif /* __APPLE__ */
         movq	$0x7fffffffffffffff, %r10
@@ -502,27 +548,27 @@ _fe_isnonzero:
 .text
 .globl	fe_isnegative
 .type	fe_isnegative,@function
-.align	4
+.align	16
 fe_isnegative:
 #else
 .section	__TEXT,__text
 .globl	_fe_isnegative
-.p2align	2
+.p2align	4
 _fe_isnegative:
 #endif /* __APPLE__ */
-        movq	$0x7fffffffffffffff, %r10
-        movq	(%rdi), %rax
-        movq	8(%rdi), %rdx
-        movq	16(%rdi), %rcx
-        movq	24(%rdi), %r8
-        addq	$19, %rax
-        adcq	$0x00, %rdx
+        movq	$0x7fffffffffffffff, %r11
+        movq	(%rdi), %rdx
+        movq	8(%rdi), %rcx
+        movq	16(%rdi), %r8
+        movq	24(%rdi), %r9
+        movq	%rdx, %rax
+        addq	$19, %rdx
         adcq	$0x00, %rcx
         adcq	$0x00, %r8
-        shrq	$63, %r8
-        imulq	$19, %r8, %r9
-        movq	(%rdi), %rax
-        addq	%r9, %rax
+        adcq	$0x00, %r9
+        shrq	$63, %r9
+        imulq	$19, %r9, %r10
+        addq	%r10, %rax
         andq	$0x01, %rax
         repz retq
 #ifndef __APPLE__
@@ -532,12 +578,12 @@ _fe_isnegative:
 .text
 .globl	fe_cmov_table
 .type	fe_cmov_table,@function
-.align	4
+.align	16
 fe_cmov_table:
 #else
 .section	__TEXT,__text
 .globl	_fe_cmov_table
-.p2align	2
+.p2align	4
 _fe_cmov_table:
 #endif /* __APPLE__ */
         pushq	%r12
@@ -820,15 +866,19 @@ _fe_cmov_table:
 .text
 .globl	fe_mul
 .type	fe_mul,@function
-.align	4
+.align	16
 fe_mul:
 #else
 .section	__TEXT,__text
 .globl	_fe_mul
-.p2align	2
+.p2align	4
 _fe_mul:
 #endif /* __APPLE__ */
+#ifndef __APPLE__
         jmpq	*fe_mul_p(%rip)
+#else
+        jmpq	*_fe_mul_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
 .size	fe_mul,.-fe_mul
 #endif /* __APPLE__ */
@@ -836,15 +886,19 @@ _fe_mul:
 .text
 .globl	fe_sq
 .type	fe_sq,@function
-.align	4
+.align	16
 fe_sq:
 #else
 .section	__TEXT,__text
 .globl	_fe_sq
-.p2align	2
+.p2align	4
 _fe_sq:
 #endif /* __APPLE__ */
+#ifndef __APPLE__
         jmpq	*fe_sq_p(%rip)
+#else
+        jmpq	*_fe_sq_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
 .size	fe_sq,.-fe_sq
 #endif /* __APPLE__ */
@@ -852,15 +906,19 @@ _fe_sq:
 .text
 .globl	fe_mul121666
 .type	fe_mul121666,@function
-.align	4
+.align	16
 fe_mul121666:
 #else
 .section	__TEXT,__text
 .globl	_fe_mul121666
-.p2align	2
+.p2align	4
 _fe_mul121666:
 #endif /* __APPLE__ */
+#ifndef __APPLE__
         jmpq	*fe_mul121666_p(%rip)
+#else
+        jmpq	*_fe_mul121666_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
 .size	fe_mul121666,.-fe_mul121666
 #endif /* __APPLE__ */
@@ -868,15 +926,19 @@ _fe_mul121666:
 .text
 .globl	fe_sq2
 .type	fe_sq2,@function
-.align	4
+.align	16
 fe_sq2:
 #else
 .section	__TEXT,__text
 .globl	_fe_sq2
-.p2align	2
+.p2align	4
 _fe_sq2:
 #endif /* __APPLE__ */
+#ifndef __APPLE__
         jmpq	*fe_sq2_p(%rip)
+#else
+        jmpq	*_fe_sq2_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
 .size	fe_sq2,.-fe_sq2
 #endif /* __APPLE__ */
@@ -884,15 +946,19 @@ _fe_sq2:
 .text
 .globl	fe_invert
 .type	fe_invert,@function
-.align	4
+.align	16
 fe_invert:
 #else
 .section	__TEXT,__text
 .globl	_fe_invert
-.p2align	2
+.p2align	4
 _fe_invert:
 #endif /* __APPLE__ */
+#ifndef __APPLE__
         jmpq	*fe_invert_p(%rip)
+#else
+        jmpq	*_fe_invert_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
 .size	fe_invert,.-fe_invert
 #endif /* __APPLE__ */
@@ -900,15 +966,19 @@ _fe_invert:
 .text
 .globl	curve25519
 .type	curve25519,@function
-.align	4
+.align	16
 curve25519:
 #else
 .section	__TEXT,__text
 .globl	_curve25519
-.p2align	2
+.p2align	4
 _curve25519:
 #endif /* __APPLE__ */
+#ifndef __APPLE__
         jmpq	*curve25519_p(%rip)
+#else
+        jmpq	*_curve25519_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
 .size	curve25519,.-curve25519
 #endif /* __APPLE__ */
@@ -916,15 +986,19 @@ _curve25519:
 .text
 .globl	fe_pow22523
 .type	fe_pow22523,@function
-.align	4
+.align	16
 fe_pow22523:
 #else
 .section	__TEXT,__text
 .globl	_fe_pow22523
-.p2align	2
+.p2align	4
 _fe_pow22523:
 #endif /* __APPLE__ */
+#ifndef __APPLE__
         jmpq	*fe_pow22523_p(%rip)
+#else
+        jmpq	*_fe_pow22523_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
 .size	fe_pow22523,.-fe_pow22523
 #endif /* __APPLE__ */
@@ -932,15 +1006,19 @@ _fe_pow22523:
 .text
 .globl	fe_ge_to_p2
 .type	fe_ge_to_p2,@function
-.align	4
+.align	16
 fe_ge_to_p2:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_to_p2
-.p2align	2
+.p2align	4
 _fe_ge_to_p2:
 #endif /* __APPLE__ */
+#ifndef __APPLE__
         jmpq	*fe_ge_to_p2_p(%rip)
+#else
+        jmpq	*_fe_ge_to_p2_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
 .size	fe_ge_to_p2,.-fe_ge_to_p2
 #endif /* __APPLE__ */
@@ -948,15 +1026,19 @@ _fe_ge_to_p2:
 .text
 .globl	fe_ge_to_p3
 .type	fe_ge_to_p3,@function
-.align	4
+.align	16
 fe_ge_to_p3:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_to_p3
-.p2align	2
+.p2align	4
 _fe_ge_to_p3:
 #endif /* __APPLE__ */
+#ifndef __APPLE__
         jmpq	*fe_ge_to_p3_p(%rip)
+#else
+        jmpq	*_fe_ge_to_p3_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
 .size	fe_ge_to_p3,.-fe_ge_to_p3
 #endif /* __APPLE__ */
@@ -964,15 +1046,19 @@ _fe_ge_to_p3:
 .text
 .globl	fe_ge_dbl
 .type	fe_ge_dbl,@function
-.align	4
+.align	16
 fe_ge_dbl:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_dbl
-.p2align	2
+.p2align	4
 _fe_ge_dbl:
 #endif /* __APPLE__ */
+#ifndef __APPLE__
         jmpq	*fe_ge_dbl_p(%rip)
+#else
+        jmpq	*_fe_ge_dbl_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
 .size	fe_ge_dbl,.-fe_ge_dbl
 #endif /* __APPLE__ */
@@ -980,15 +1066,19 @@ _fe_ge_dbl:
 .text
 .globl	fe_ge_madd
 .type	fe_ge_madd,@function
-.align	4
+.align	16
 fe_ge_madd:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_madd
-.p2align	2
+.p2align	4
 _fe_ge_madd:
 #endif /* __APPLE__ */
+#ifndef __APPLE__
         jmpq	*fe_ge_madd_p(%rip)
+#else
+        jmpq	*_fe_ge_madd_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
 .size	fe_ge_madd,.-fe_ge_madd
 #endif /* __APPLE__ */
@@ -996,15 +1086,19 @@ _fe_ge_madd:
 .text
 .globl	fe_ge_msub
 .type	fe_ge_msub,@function
-.align	4
+.align	16
 fe_ge_msub:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_msub
-.p2align	2
+.p2align	4
 _fe_ge_msub:
 #endif /* __APPLE__ */
+#ifndef __APPLE__
         jmpq	*fe_ge_msub_p(%rip)
+#else
+        jmpq	*_fe_ge_msub_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
 .size	fe_ge_msub,.-fe_ge_msub
 #endif /* __APPLE__ */
@@ -1012,15 +1106,19 @@ _fe_ge_msub:
 .text
 .globl	fe_ge_add
 .type	fe_ge_add,@function
-.align	4
+.align	16
 fe_ge_add:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_add
-.p2align	2
+.p2align	4
 _fe_ge_add:
 #endif /* __APPLE__ */
+#ifndef __APPLE__
         jmpq	*fe_ge_add_p(%rip)
+#else
+        jmpq	*_fe_ge_add_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
 .size	fe_ge_add,.-fe_ge_add
 #endif /* __APPLE__ */
@@ -1028,108 +1126,224 @@ _fe_ge_add:
 .text
 .globl	fe_ge_sub
 .type	fe_ge_sub,@function
-.align	4
+.align	16
 fe_ge_sub:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_sub
-.p2align	2
+.p2align	4
 _fe_ge_sub:
 #endif /* __APPLE__ */
+#ifndef __APPLE__
         jmpq	*fe_ge_sub_p(%rip)
+#else
+        jmpq	*_fe_ge_sub_p(%rip)
+#endif /* __APPLE__ */
 #ifndef __APPLE__
 .size	fe_ge_sub,.-fe_ge_sub
 #endif /* __APPLE__ */
-	.data
-	.type	cpuFlagsSet, @object
-	.size	cpuFlagsSet,4
+#ifndef __APPLE__
+.data
+.type	cpuFlagsSet, @object
+.size	cpuFlagsSet,4
 cpuFlagsSet:
 	.long	0
-	.data
-	.type	intelFlags, @object
-	.size	intelFlags,4
+#else
+.section	__DATA,__data
+.p2align	2
+_cpuFlagsSet:
+	.long	0
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.data
+.type	intelFlags, @object
+.size	intelFlags,4
 intelFlags:
 	.long	0
-	.data
-	.type	fe_mul_p, @object
-	.size	fe_mul_p,8
+#else
+.section	__DATA,__data
+.p2align	2
+_intelFlags:
+	.long	0
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.data
+.type	fe_mul_p, @object
+.size	fe_mul_p,8
 fe_mul_p:
 	.quad	fe_mul_x64
-	.data
-	.type	fe_sq_p, @object
-	.size	fe_sq_p,8
+#else
+.section	__DATA,__data
+.p2align	2
+_fe_mul_p:
+	.quad	_fe_mul_x64
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.data
+.type	fe_sq_p, @object
+.size	fe_sq_p,8
 fe_sq_p:
 	.quad	fe_sq_x64
-	.data
-	.type	fe_mul121666_p, @object
-	.size	fe_mul121666_p,8
+#else
+.section	__DATA,__data
+.p2align	2
+_fe_sq_p:
+	.quad	_fe_sq_x64
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.data
+.type	fe_mul121666_p, @object
+.size	fe_mul121666_p,8
 fe_mul121666_p:
 	.quad	fe_mul121666_x64
-	.data
-	.type	fe_sq2_p, @object
-	.size	fe_sq2_p,8
+#else
+.section	__DATA,__data
+.p2align	2
+_fe_mul121666_p:
+	.quad	_fe_mul121666_x64
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.data
+.type	fe_sq2_p, @object
+.size	fe_sq2_p,8
 fe_sq2_p:
 	.quad	fe_sq2_x64
-	.data
-	.type	fe_invert_p, @object
-	.size	fe_invert_p,8
+#else
+.section	__DATA,__data
+.p2align	2
+_fe_sq2_p:
+	.quad	_fe_sq2_x64
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.data
+.type	fe_invert_p, @object
+.size	fe_invert_p,8
 fe_invert_p:
 	.quad	fe_invert_x64
-	.data
-	.type	curve25519_p, @object
-	.size	curve25519_p,8
+#else
+.section	__DATA,__data
+.p2align	2
+_fe_invert_p:
+	.quad	_fe_invert_x64
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.data
+.type	curve25519_p, @object
+.size	curve25519_p,8
 curve25519_p:
 	.quad	curve25519_x64
-	.data
-	.type	fe_pow22523_p, @object
-	.size	fe_pow22523_p,8
+#else
+.section	__DATA,__data
+.p2align	2
+_curve25519_p:
+	.quad	_curve25519_x64
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.data
+.type	fe_pow22523_p, @object
+.size	fe_pow22523_p,8
 fe_pow22523_p:
 	.quad	fe_pow22523_x64
-	.data
-	.type	fe_ge_to_p2_p, @object
-	.size	fe_ge_to_p2_p,8
+#else
+.section	__DATA,__data
+.p2align	2
+_fe_pow22523_p:
+	.quad	_fe_pow22523_x64
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.data
+.type	fe_ge_to_p2_p, @object
+.size	fe_ge_to_p2_p,8
 fe_ge_to_p2_p:
 	.quad	fe_ge_to_p2_x64
-	.data
-	.type	fe_ge_to_p3_p, @object
-	.size	fe_ge_to_p3_p,8
+#else
+.section	__DATA,__data
+.p2align	2
+_fe_ge_to_p2_p:
+	.quad	_fe_ge_to_p2_x64
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.data
+.type	fe_ge_to_p3_p, @object
+.size	fe_ge_to_p3_p,8
 fe_ge_to_p3_p:
 	.quad	fe_ge_to_p3_x64
-	.data
-	.type	fe_ge_dbl_p, @object
-	.size	fe_ge_dbl_p,8
+#else
+.section	__DATA,__data
+.p2align	2
+_fe_ge_to_p3_p:
+	.quad	_fe_ge_to_p3_x64
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.data
+.type	fe_ge_dbl_p, @object
+.size	fe_ge_dbl_p,8
 fe_ge_dbl_p:
 	.quad	fe_ge_dbl_x64
-	.data
-	.type	fe_ge_madd_p, @object
-	.size	fe_ge_madd_p,8
+#else
+.section	__DATA,__data
+.p2align	2
+_fe_ge_dbl_p:
+	.quad	_fe_ge_dbl_x64
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.data
+.type	fe_ge_madd_p, @object
+.size	fe_ge_madd_p,8
 fe_ge_madd_p:
 	.quad	fe_ge_madd_x64
-	.data
-	.type	fe_ge_msub_p, @object
-	.size	fe_ge_msub_p,8
+#else
+.section	__DATA,__data
+.p2align	2
+_fe_ge_madd_p:
+	.quad	_fe_ge_madd_x64
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.data
+.type	fe_ge_msub_p, @object
+.size	fe_ge_msub_p,8
 fe_ge_msub_p:
 	.quad	fe_ge_msub_x64
-	.data
-	.type	fe_ge_add_p, @object
-	.size	fe_ge_add_p,8
+#else
+.section	__DATA,__data
+.p2align	2
+_fe_ge_msub_p:
+	.quad	_fe_ge_msub_x64
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.data
+.type	fe_ge_add_p, @object
+.size	fe_ge_add_p,8
 fe_ge_add_p:
 	.quad	fe_ge_add_x64
-	.data
-	.type	fe_ge_sub_p, @object
-	.size	fe_ge_sub_p,8
+#else
+.section	__DATA,__data
+.p2align	2
+_fe_ge_add_p:
+	.quad	_fe_ge_add_x64
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.data
+.type	fe_ge_sub_p, @object
+.size	fe_ge_sub_p,8
 fe_ge_sub_p:
 	.quad	fe_ge_sub_x64
+#else
+.section	__DATA,__data
+.p2align	2
+_fe_ge_sub_p:
+	.quad	_fe_ge_sub_x64
+#endif /* __APPLE__ */
 #ifndef __APPLE__
 .text
 .globl	fe_mul_x64
 .type	fe_mul_x64,@function
-.align	4
+.align	16
 fe_mul_x64:
 #else
 .section	__TEXT,__text
 .globl	_fe_mul_x64
-.p2align	2
+.p2align	4
 _fe_mul_x64:
 #endif /* __APPLE__ */
         pushq	%r12
@@ -1304,12 +1518,12 @@ _fe_mul_x64:
 .text
 .globl	fe_sq_x64
 .type	fe_sq_x64,@function
-.align	4
+.align	16
 fe_sq_x64:
 #else
 .section	__TEXT,__text
 .globl	_fe_sq_x64
-.p2align	2
+.p2align	4
 _fe_sq_x64:
 #endif /* __APPLE__ */
         pushq	%r12
@@ -1452,14 +1666,170 @@ _fe_sq_x64:
 #endif /* __APPLE__ */
 #ifndef __APPLE__
 .text
+.globl	fe_sq_n_x64
+.type	fe_sq_n_x64,@function
+.align	16
+fe_sq_n_x64:
+#else
+.section	__TEXT,__text
+.globl	_fe_sq_n_x64
+.p2align	4
+_fe_sq_n_x64:
+#endif /* __APPLE__ */
+        pushq	%r12
+        pushq	%r13
+        pushq	%r14
+        pushq	%r15
+        pushq	%rbx
+        movq	%rdx, %rcx
+L_fe_sq_n_x64:
+        # Square
+        #  A[0] * A[1]
+        movq	(%rsi), %rax
+        mulq	8(%rsi)
+        movq	%rax, %r9
+        movq	%rdx, %r10
+        #  A[0] * A[2]
+        movq	(%rsi), %rax
+        mulq	16(%rsi)
+        xorq	%r11, %r11
+        addq	%rax, %r10
+        adcq	%rdx, %r11
+        #  A[0] * A[3]
+        movq	(%rsi), %rax
+        mulq	24(%rsi)
+        xorq	%r12, %r12
+        addq	%rax, %r11
+        adcq	%rdx, %r12
+        #  A[1] * A[2]
+        movq	8(%rsi), %rax
+        mulq	16(%rsi)
+        xorq	%r13, %r13
+        addq	%rax, %r11
+        adcq	%rdx, %r12
+        adcq	$0x00, %r13
+        #  A[1] * A[3]
+        movq	8(%rsi), %rax
+        mulq	24(%rsi)
+        addq	%rax, %r12
+        adcq	%rdx, %r13
+        #  A[2] * A[3]
+        movq	16(%rsi), %rax
+        mulq	24(%rsi)
+        xorq	%r14, %r14
+        addq	%rax, %r13
+        adcq	%rdx, %r14
+        # Double
+        xorq	%r15, %r15
+        addq	%r9, %r9
+        adcq	%r10, %r10
+        adcq	%r11, %r11
+        adcq	%r12, %r12
+        adcq	%r13, %r13
+        adcq	%r14, %r14
+        adcq	$0x00, %r15
+        #  A[0] * A[0]
+        movq	(%rsi), %rax
+        mulq	%rax
+        movq	%rax, %r8
+        movq	%rdx, %rbx
+        #  A[1] * A[1]
+        movq	8(%rsi), %rax
+        mulq	%rax
+        addq	%rbx, %r9
+        adcq	%rax, %r10
+        adcq	$0x00, %rdx
+        movq	%rdx, %rbx
+        #  A[2] * A[2]
+        movq	16(%rsi), %rax
+        mulq	%rax
+        addq	%rbx, %r11
+        adcq	%rax, %r12
+        adcq	$0x00, %rdx
+        movq	%rdx, %rbx
+        #  A[3] * A[3]
+        movq	24(%rsi), %rax
+        mulq	%rax
+        addq	%rax, %r14
+        adcq	%rdx, %r15
+        addq	%rbx, %r13
+        adcq	$0x00, %r14
+        adcq	$0x00, %r15
+        # Reduce
+        movq	$0x7fffffffffffffff, %rbx
+        #  Move top half into t4-t7 and remove top bit from t3
+        shldq	$0x01, %r14, %r15
+        shldq	$0x01, %r13, %r14
+        shldq	$0x01, %r12, %r13
+        shldq	$0x01, %r11, %r12
+        andq	%rbx, %r11
+        #  Multiply top half by 19
+        movq	$19, %rax
+        mulq	%r12
+        xorq	%r12, %r12
+        addq	%rax, %r8
+        movq	$19, %rax
+        adcq	%rdx, %r12
+        mulq	%r13
+        xorq	%r13, %r13
+        addq	%rax, %r9
+        movq	$19, %rax
+        adcq	%rdx, %r13
+        mulq	%r14
+        xorq	%r14, %r14
+        addq	%rax, %r10
+        movq	$19, %rax
+        adcq	%rdx, %r14
+        mulq	%r15
+        #  Add remaining product results in
+        addq	%r12, %r9
+        adcq	%r13, %r10
+        adcq	%r14, %r11
+        adcq	%rax, %r11
+        adcq	$0x00, %rdx
+        #  Overflow
+        shldq	$0x01, %r11, %rdx
+        imulq	$19, %rdx, %rax
+        andq	%rbx, %r11
+        addq	%rax, %r8
+        adcq	$0x00, %r9
+        adcq	$0x00, %r10
+        adcq	$0x00, %r11
+        # Reduce if top bit set
+        movq	%r11, %rdx
+        shrq	$63, %rdx
+        imulq	$19, %rdx, %rax
+        andq	%rbx, %r11
+        addq	%rax, %r8
+        adcq	$0x00, %r9
+        adcq	$0x00, %r10
+        adcq	$0x00, %r11
+        # Store
+        movq	%r8, (%rdi)
+        movq	%r9, 8(%rdi)
+        movq	%r10, 16(%rdi)
+        movq	%r11, 24(%rdi)
+        decb	%cl
+        jnz	L_fe_sq_n_x64
+        popq	%rbx
+        popq	%r15
+        popq	%r14
+        popq	%r13
+        popq	%r12
+        repz retq
+#ifndef __APPLE__
+.size	fe_sq_n_x64,.-fe_sq_n_x64
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.text
 .globl	fe_mul121666_x64
 .type	fe_mul121666_x64,@function
-.align	4
+.align	16
 fe_mul121666_x64:
 #else
 .section	__TEXT,__text
 .globl	_fe_mul121666_x64
-.p2align	2
+.p2align	4
 _fe_mul121666_x64:
 #endif /* __APPLE__ */
         pushq	%r12
@@ -1505,12 +1875,12 @@ _fe_mul121666_x64:
 .text
 .globl	fe_sq2_x64
 .type	fe_sq2_x64,@function
-.align	4
+.align	16
 fe_sq2_x64:
 #else
 .section	__TEXT,__text
 .globl	_fe_sq2_x64
-.p2align	2
+.p2align	4
 _fe_sq2_x64:
 #endif /* __APPLE__ */
         pushq	%r12
@@ -1668,15 +2038,15 @@ _fe_sq2_x64:
 .text
 .globl	fe_invert_x64
 .type	fe_invert_x64,@function
-.align	4
+.align	16
 fe_invert_x64:
 #else
 .section	__TEXT,__text
 .globl	_fe_invert_x64
-.p2align	2
+.p2align	4
 _fe_invert_x64:
 #endif /* __APPLE__ */
-        subq	$0x98, %rsp
+        subq	$0x90, %rsp
         # Invert
         movq	%rdi, 128(%rsp)
         movq	%rsi, 136(%rsp)
@@ -1739,17 +2109,14 @@ _fe_invert_x64:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$4, 144(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_fe_invert_x64_1:
+        movq	$4, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_x64_1
         leaq	32(%rsp), %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -1765,17 +2132,14 @@ L_fe_invert_x64_1:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$9, 144(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_fe_invert_x64_2:
+        movq	$9, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_x64_2
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -1791,17 +2155,14 @@ L_fe_invert_x64_2:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$19, 144(%rsp)
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
-L_fe_invert_x64_3:
+        movq	$19, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_x64_3
         leaq	64(%rsp), %rdi
         leaq	96(%rsp), %rsi
         leaq	64(%rsp), %rdx
@@ -1817,17 +2178,14 @@ L_fe_invert_x64_3:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$9, 144(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_fe_invert_x64_4:
+        movq	$9, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_x64_4
         leaq	32(%rsp), %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -1843,17 +2201,14 @@ L_fe_invert_x64_4:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$49, 144(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_fe_invert_x64_5:
+        movq	$49, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_x64_5
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -1869,17 +2224,14 @@ L_fe_invert_x64_5:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$0x63, 144(%rsp)
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
-L_fe_invert_x64_6:
+        movq	$0x63, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_x64_6
         leaq	64(%rsp), %rdi
         leaq	96(%rsp), %rsi
         leaq	64(%rsp), %rdx
@@ -1895,17 +2247,14 @@ L_fe_invert_x64_6:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$49, 144(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_fe_invert_x64_7:
+        movq	$49, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_x64_7
         leaq	32(%rsp), %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -1921,17 +2270,14 @@ L_fe_invert_x64_7:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$4, 144(%rsp)
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
-L_fe_invert_x64_8:
+        movq	$4, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_x64_8
         movq	128(%rsp), %rdi
         leaq	32(%rsp), %rsi
         movq	%rsp, %rdx
@@ -1942,18 +2288,18 @@ L_fe_invert_x64_8:
 #endif /* __APPLE__ */
         movq	136(%rsp), %rsi
         movq	128(%rsp), %rdi
-        addq	$0x98, %rsp
+        addq	$0x90, %rsp
         repz retq
 #ifndef __APPLE__
 .text
 .globl	curve25519_x64
 .type	curve25519_x64,@function
-.align	4
+.align	16
 curve25519_x64:
 #else
 .section	__TEXT,__text
 .globl	_curve25519_x64
-.p2align	2
+.p2align	4
 _curve25519_x64:
 #endif /* __APPLE__ */
         pushq	%r12
@@ -3611,17 +3957,14 @@ L_curve25519_x64_bits:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$4, 160(%rsp)
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
-L_curve25519_x64_inv_1:
+        movq	$4, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_x64_inv_1
         leaq	64(%rsp), %rdi
         leaq	96(%rsp), %rsi
         leaq	64(%rsp), %rdx
@@ -3637,17 +3980,14 @@ L_curve25519_x64_inv_1:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$9, 160(%rsp)
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
-L_curve25519_x64_inv_2:
+        movq	$9, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_x64_inv_2
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
         leaq	64(%rsp), %rdx
@@ -3663,17 +4003,14 @@ L_curve25519_x64_inv_2:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$19, 160(%rsp)
         leaq	128(%rsp), %rdi
         leaq	128(%rsp), %rsi
-L_curve25519_x64_inv_3:
+        movq	$19, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_x64_inv_3
         leaq	96(%rsp), %rdi
         leaq	128(%rsp), %rsi
         leaq	96(%rsp), %rdx
@@ -3689,17 +4026,14 @@ L_curve25519_x64_inv_3:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$9, 160(%rsp)
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
-L_curve25519_x64_inv_4:
+        movq	$9, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_x64_inv_4
         leaq	64(%rsp), %rdi
         leaq	96(%rsp), %rsi
         leaq	64(%rsp), %rdx
@@ -3715,17 +4049,14 @@ L_curve25519_x64_inv_4:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$49, 160(%rsp)
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
-L_curve25519_x64_inv_5:
+        movq	$49, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_x64_inv_5
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
         leaq	64(%rsp), %rdx
@@ -3741,17 +4072,14 @@ L_curve25519_x64_inv_5:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$0x63, 160(%rsp)
         leaq	128(%rsp), %rdi
         leaq	128(%rsp), %rsi
-L_curve25519_x64_inv_6:
+        movq	$0x63, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_x64_inv_6
         leaq	96(%rsp), %rdi
         leaq	128(%rsp), %rsi
         leaq	96(%rsp), %rdx
@@ -3767,17 +4095,14 @@ L_curve25519_x64_inv_6:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$49, 160(%rsp)
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
-L_curve25519_x64_inv_7:
+        movq	$49, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_x64_inv_7
         leaq	64(%rsp), %rdi
         leaq	96(%rsp), %rsi
         leaq	64(%rsp), %rdx
@@ -3793,17 +4118,14 @@ L_curve25519_x64_inv_7:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$4, 160(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_curve25519_x64_inv_8:
+        movq	$4, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_x64_inv_8
         movq	%rsp, %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -3982,15 +4304,15 @@ L_curve25519_x64_inv_8:
 .text
 .globl	fe_pow22523_x64
 .type	fe_pow22523_x64,@function
-.align	4
+.align	16
 fe_pow22523_x64:
 #else
 .section	__TEXT,__text
 .globl	_fe_pow22523_x64
-.p2align	2
+.p2align	4
 _fe_pow22523_x64:
 #endif /* __APPLE__ */
-        subq	$0x78, %rsp
+        subq	$0x70, %rsp
         # pow22523
         movq	%rdi, 96(%rsp)
         movq	%rsi, 104(%rsp)
@@ -4053,17 +4375,14 @@ _fe_pow22523_x64:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$4, 112(%rsp)
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
-L_fe_pow22523_x64_1:
+        movq	$4, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	112(%rsp)
-        jnz	L_fe_pow22523_x64_1
         movq	%rsp, %rdi
         leaq	32(%rsp), %rsi
         movq	%rsp, %rdx
@@ -4079,17 +4398,14 @@ L_fe_pow22523_x64_1:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$9, 112(%rsp)
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
-L_fe_pow22523_x64_2:
+        movq	$9, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	112(%rsp)
-        jnz	L_fe_pow22523_x64_2
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
         movq	%rsp, %rdx
@@ -4105,17 +4421,14 @@ L_fe_pow22523_x64_2:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$19, 112(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_fe_pow22523_x64_3:
+        movq	$19, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	112(%rsp)
-        jnz	L_fe_pow22523_x64_3
         leaq	32(%rsp), %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -4131,17 +4444,14 @@ L_fe_pow22523_x64_3:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$9, 112(%rsp)
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
-L_fe_pow22523_x64_4:
+        movq	$9, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	112(%rsp)
-        jnz	L_fe_pow22523_x64_4
         movq	%rsp, %rdi
         leaq	32(%rsp), %rsi
         movq	%rsp, %rdx
@@ -4157,17 +4467,14 @@ L_fe_pow22523_x64_4:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$49, 112(%rsp)
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
-L_fe_pow22523_x64_5:
+        movq	$49, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	112(%rsp)
-        jnz	L_fe_pow22523_x64_5
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
         movq	%rsp, %rdx
@@ -4183,17 +4490,14 @@ L_fe_pow22523_x64_5:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$0x63, 112(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_fe_pow22523_x64_6:
+        movq	$0x63, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	112(%rsp)
-        jnz	L_fe_pow22523_x64_6
         leaq	32(%rsp), %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -4209,17 +4513,14 @@ L_fe_pow22523_x64_6:
 #else
         callq	_fe_sq_x64
 #endif /* __APPLE__ */
-        movb	$49, 112(%rsp)
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
-L_fe_pow22523_x64_7:
+        movq	$49, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_x64@plt
+        callq	fe_sq_n_x64@plt
 #else
-        callq	_fe_sq_x64
+        callq	_fe_sq_n_x64
 #endif /* __APPLE__ */
-        decb	112(%rsp)
-        jnz	L_fe_pow22523_x64_7
         movq	%rsp, %rdi
         leaq	32(%rsp), %rsi
         movq	%rsp, %rdx
@@ -4252,18 +4553,18 @@ L_fe_pow22523_x64_7:
 #endif /* __APPLE__ */
         movq	104(%rsp), %rsi
         movq	96(%rsp), %rdi
-        addq	$0x78, %rsp
+        addq	$0x70, %rsp
         repz retq
 #ifndef __APPLE__
 .text
 .globl	fe_ge_to_p2_x64
 .type	fe_ge_to_p2_x64,@function
-.align	4
+.align	16
 fe_ge_to_p2_x64:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_to_p2_x64
-.p2align	2
+.p2align	4
 _fe_ge_to_p2_x64:
 #endif /* __APPLE__ */
         pushq	%rbx
@@ -4758,12 +5059,12 @@ _fe_ge_to_p2_x64:
 .text
 .globl	fe_ge_to_p3_x64
 .type	fe_ge_to_p3_x64,@function
-.align	4
+.align	16
 fe_ge_to_p3_x64:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_to_p3_x64
-.p2align	2
+.p2align	4
 _fe_ge_to_p3_x64:
 #endif /* __APPLE__ */
         pushq	%rbx
@@ -5414,12 +5715,12 @@ _fe_ge_to_p3_x64:
 .text
 .globl	fe_ge_dbl_x64
 .type	fe_ge_dbl_x64,@function
-.align	4
+.align	16
 fe_ge_dbl_x64:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_dbl_x64
-.p2align	2
+.p2align	4
 _fe_ge_dbl_x64:
 #endif /* __APPLE__ */
         pushq	%rbx
@@ -6111,12 +6412,12 @@ _fe_ge_dbl_x64:
 .text
 .globl	fe_ge_madd_x64
 .type	fe_ge_madd_x64,@function
-.align	4
+.align	16
 fe_ge_madd_x64:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_madd_x64
-.p2align	2
+.p2align	4
 _fe_ge_madd_x64:
 #endif /* __APPLE__ */
         pushq	%rbx
@@ -6809,12 +7110,12 @@ _fe_ge_madd_x64:
 .text
 .globl	fe_ge_msub_x64
 .type	fe_ge_msub_x64,@function
-.align	4
+.align	16
 fe_ge_msub_x64:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_msub_x64
-.p2align	2
+.p2align	4
 _fe_ge_msub_x64:
 #endif /* __APPLE__ */
         pushq	%rbx
@@ -7507,12 +7808,12 @@ _fe_ge_msub_x64:
 .text
 .globl	fe_ge_add_x64
 .type	fe_ge_add_x64,@function
-.align	4
+.align	16
 fe_ge_add_x64:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_add_x64
-.p2align	2
+.p2align	4
 _fe_ge_add_x64:
 #endif /* __APPLE__ */
         pushq	%rbx
@@ -8361,12 +8662,12 @@ _fe_ge_add_x64:
 .text
 .globl	fe_ge_sub_x64
 .type	fe_ge_sub_x64,@function
-.align	4
+.align	16
 fe_ge_sub_x64:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_sub_x64
-.p2align	2
+.p2align	4
 _fe_ge_sub_x64:
 #endif /* __APPLE__ */
         pushq	%rbx
@@ -9216,12 +9517,12 @@ _fe_ge_sub_x64:
 .text
 .globl	fe_mul_avx2
 .type	fe_mul_avx2,@function
-.align	4
+.align	16
 fe_mul_avx2:
 #else
 .section	__TEXT,__text
 .globl	_fe_mul_avx2
-.p2align	2
+.p2align	4
 _fe_mul_avx2:
 #endif /* __APPLE__ */
         pushq	%r12
@@ -9368,12 +9669,12 @@ _fe_mul_avx2:
 .text
 .globl	fe_sq_avx2
 .type	fe_sq_avx2,@function
-.align	4
+.align	16
 fe_sq_avx2:
 #else
 .section	__TEXT,__text
 .globl	_fe_sq_avx2
-.p2align	2
+.p2align	4
 _fe_sq_avx2:
 #endif /* __APPLE__ */
         pushq	%rbx
@@ -9493,14 +9794,147 @@ _fe_sq_avx2:
 #endif /* __APPLE__ */
 #ifndef __APPLE__
 .text
+.globl	fe_sq_n_avx2
+.type	fe_sq_n_avx2,@function
+.align	16
+fe_sq_n_avx2:
+#else
+.section	__TEXT,__text
+.globl	_fe_sq_n_avx2
+.p2align	4
+_fe_sq_n_avx2:
+#endif /* __APPLE__ */
+        pushq	%rbx
+        pushq	%r12
+        pushq	%r13
+        pushq	%r14
+        pushq	%r15
+        pushq	%rbp
+        movq	%rdx, %rbp
+L_fe_sq_n_avx2:
+        # Square
+        # A[0] * A[1]
+        movq	(%rsi), %rdx
+        mulxq	8(%rsi), %r9, %r10
+        # A[0] * A[3]
+        mulxq	24(%rsi), %r11, %r12
+        # A[2] * A[1]
+        movq	16(%rsi), %rdx
+        mulxq	8(%rsi), %rcx, %rbx
+        xorq	%r15, %r15
+        adoxq	%rcx, %r11
+        # A[2] * A[3]
+        mulxq	24(%rsi), %r13, %r14
+        adoxq	%rbx, %r12
+        # A[2] * A[0]
+        mulxq	(%rsi), %rcx, %rbx
+        adoxq	%r15, %r13
+        adcxq	%rcx, %r10
+        adoxq	%r15, %r14
+        # A[1] * A[3]
+        movq	8(%rsi), %rdx
+        mulxq	24(%rsi), %rax, %r8
+        adcxq	%rbx, %r11
+        adcxq	%rax, %r12
+        adcxq	%r8, %r13
+        adcxq	%r15, %r14
+        # Double with Carry Flag
+        xorq	%r15, %r15
+        # A[0] * A[0]
+        movq	(%rsi), %rdx
+        mulxq	%rdx, %r8, %rax
+        adcxq	%r9, %r9
+        # A[1] * A[1]
+        movq	8(%rsi), %rdx
+        mulxq	%rdx, %rcx, %rbx
+        adcxq	%r10, %r10
+        adoxq	%rax, %r9
+        adcxq	%r11, %r11
+        adoxq	%rcx, %r10
+        # A[2] * A[2]
+        movq	16(%rsi), %rdx
+        mulxq	%rdx, %rax, %rcx
+        adcxq	%r12, %r12
+        adoxq	%rbx, %r11
+        adcxq	%r13, %r13
+        adoxq	%rax, %r12
+        # A[3] * A[3]
+        movq	24(%rsi), %rdx
+        mulxq	%rdx, %rax, %rbx
+        adcxq	%r14, %r14
+        adoxq	%rcx, %r13
+        adcxq	%r15, %r15
+        adoxq	%rax, %r14
+        adoxq	%rbx, %r15
+        # Reduce
+        movq	$0x7fffffffffffffff, %rcx
+        #  Move top half into t4-t7 and remove top bit from t3
+        shldq	$0x01, %r14, %r15
+        shldq	$0x01, %r13, %r14
+        shldq	$0x01, %r12, %r13
+        shldq	$0x01, %r11, %r12
+        andq	%rcx, %r11
+        #  Multiply top half by 19
+        movq	$19, %rdx
+        xorq	%rcx, %rcx
+        mulxq	%r12, %rax, %r12
+        adcxq	%rax, %r8
+        adoxq	%r12, %r9
+        mulxq	%r13, %rax, %r13
+        adcxq	%rax, %r9
+        adoxq	%r13, %r10
+        mulxq	%r14, %rax, %r14
+        adcxq	%rax, %r10
+        adoxq	%r14, %r11
+        mulxq	%r15, %r15, %rdx
+        adcxq	%r15, %r11
+        adoxq	%rcx, %rdx
+        adcxq	%rcx, %rdx
+        #  Overflow
+        shldq	$0x01, %r11, %rdx
+        movq	$0x7fffffffffffffff, %rcx
+        imulq	$19, %rdx, %rax
+        andq	%rcx, %r11
+        addq	%rax, %r8
+        adcq	$0x00, %r9
+        adcq	$0x00, %r10
+        adcq	$0x00, %r11
+        # Reduce if top bit set
+        movq	%r11, %rdx
+        shrq	$63, %rdx
+        imulq	$19, %rdx, %rax
+        andq	%rcx, %r11
+        addq	%rax, %r8
+        adcq	$0x00, %r9
+        adcq	$0x00, %r10
+        adcq	$0x00, %r11
+        # Store
+        movq	%r8, (%rdi)
+        movq	%r9, 8(%rdi)
+        movq	%r10, 16(%rdi)
+        movq	%r11, 24(%rdi)
+        decb	%bpl
+        jnz	L_fe_sq_n_avx2
+        popq	%rbp
+        popq	%r15
+        popq	%r14
+        popq	%r13
+        popq	%r12
+        popq	%rbx
+        repz retq
+#ifndef __APPLE__
+.size	fe_sq_n_avx2,.-fe_sq_n_avx2
+#endif /* __APPLE__ */
+#ifndef __APPLE__
+.text
 .globl	fe_mul121666_avx2
 .type	fe_mul121666_avx2,@function
-.align	4
+.align	16
 fe_mul121666_avx2:
 #else
 .section	__TEXT,__text
 .globl	_fe_mul121666_avx2
-.p2align	2
+.p2align	4
 _fe_mul121666_avx2:
 #endif /* __APPLE__ */
         pushq	%r12
@@ -9536,12 +9970,12 @@ _fe_mul121666_avx2:
 .text
 .globl	fe_sq2_avx2
 .type	fe_sq2_avx2,@function
-.align	4
+.align	16
 fe_sq2_avx2:
 #else
 .section	__TEXT,__text
 .globl	_fe_sq2_avx2
-.p2align	2
+.p2align	4
 _fe_sq2_avx2:
 #endif /* __APPLE__ */
         pushq	%rbx
@@ -9674,15 +10108,15 @@ _fe_sq2_avx2:
 .text
 .globl	fe_invert_avx2
 .type	fe_invert_avx2,@function
-.align	4
+.align	16
 fe_invert_avx2:
 #else
 .section	__TEXT,__text
 .globl	_fe_invert_avx2
-.p2align	2
+.p2align	4
 _fe_invert_avx2:
 #endif /* __APPLE__ */
-        subq	$0x98, %rsp
+        subq	$0x90, %rsp
         # Invert
         movq	%rdi, 128(%rsp)
         movq	%rsi, 136(%rsp)
@@ -9745,17 +10179,14 @@ _fe_invert_avx2:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$4, 144(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_fe_invert_avx2_1:
+        movq	$4, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_avx2_1
         leaq	32(%rsp), %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -9771,17 +10202,14 @@ L_fe_invert_avx2_1:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$9, 144(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_fe_invert_avx2_2:
+        movq	$9, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_avx2_2
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -9797,17 +10225,14 @@ L_fe_invert_avx2_2:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$19, 144(%rsp)
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
-L_fe_invert_avx2_3:
+        movq	$19, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_avx2_3
         leaq	64(%rsp), %rdi
         leaq	96(%rsp), %rsi
         leaq	64(%rsp), %rdx
@@ -9823,17 +10248,14 @@ L_fe_invert_avx2_3:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$9, 144(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_fe_invert_avx2_4:
+        movq	$9, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_avx2_4
         leaq	32(%rsp), %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -9849,17 +10271,14 @@ L_fe_invert_avx2_4:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$49, 144(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_fe_invert_avx2_5:
+        movq	$49, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_avx2_5
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -9875,17 +10294,14 @@ L_fe_invert_avx2_5:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$0x63, 144(%rsp)
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
-L_fe_invert_avx2_6:
+        movq	$0x63, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_avx2_6
         leaq	64(%rsp), %rdi
         leaq	96(%rsp), %rsi
         leaq	64(%rsp), %rdx
@@ -9901,17 +10317,14 @@ L_fe_invert_avx2_6:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$49, 144(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_fe_invert_avx2_7:
+        movq	$49, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_avx2_7
         leaq	32(%rsp), %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -9927,17 +10340,14 @@ L_fe_invert_avx2_7:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$4, 144(%rsp)
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
-L_fe_invert_avx2_8:
+        movq	$4, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	144(%rsp)
-        jnz	L_fe_invert_avx2_8
         movq	128(%rsp), %rdi
         leaq	32(%rsp), %rsi
         movq	%rsp, %rdx
@@ -9948,18 +10358,18 @@ L_fe_invert_avx2_8:
 #endif /* __APPLE__ */
         movq	136(%rsp), %rsi
         movq	128(%rsp), %rdi
-        addq	$0x98, %rsp
+        addq	$0x90, %rsp
         repz retq
 #ifndef __APPLE__
 .text
 .globl	curve25519_avx2
 .type	curve25519_avx2,@function
-.align	4
+.align	16
 curve25519_avx2:
 #else
 .section	__TEXT,__text
 .globl	_curve25519_avx2
-.p2align	2
+.p2align	4
 _curve25519_avx2:
 #endif /* __APPLE__ */
         pushq	%rbx
@@ -11366,17 +11776,14 @@ L_curve25519_avx2_bits:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$4, 160(%rsp)
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
-L_curve25519_avx2_inv_1:
+        movq	$4, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_avx2_inv_1
         leaq	64(%rsp), %rdi
         leaq	96(%rsp), %rsi
         leaq	64(%rsp), %rdx
@@ -11392,17 +11799,14 @@ L_curve25519_avx2_inv_1:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$9, 160(%rsp)
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
-L_curve25519_avx2_inv_2:
+        movq	$9, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_avx2_inv_2
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
         leaq	64(%rsp), %rdx
@@ -11418,17 +11822,14 @@ L_curve25519_avx2_inv_2:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$19, 160(%rsp)
         leaq	128(%rsp), %rdi
         leaq	128(%rsp), %rsi
-L_curve25519_avx2_inv_3:
+        movq	$19, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_avx2_inv_3
         leaq	96(%rsp), %rdi
         leaq	128(%rsp), %rsi
         leaq	96(%rsp), %rdx
@@ -11444,17 +11845,14 @@ L_curve25519_avx2_inv_3:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$9, 160(%rsp)
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
-L_curve25519_avx2_inv_4:
+        movq	$9, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_avx2_inv_4
         leaq	64(%rsp), %rdi
         leaq	96(%rsp), %rsi
         leaq	64(%rsp), %rdx
@@ -11470,17 +11868,14 @@ L_curve25519_avx2_inv_4:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$49, 160(%rsp)
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
-L_curve25519_avx2_inv_5:
+        movq	$49, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_avx2_inv_5
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
         leaq	64(%rsp), %rdx
@@ -11496,17 +11891,14 @@ L_curve25519_avx2_inv_5:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$0x63, 160(%rsp)
         leaq	128(%rsp), %rdi
         leaq	128(%rsp), %rsi
-L_curve25519_avx2_inv_6:
+        movq	$0x63, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_avx2_inv_6
         leaq	96(%rsp), %rdi
         leaq	128(%rsp), %rsi
         leaq	96(%rsp), %rdx
@@ -11522,17 +11914,14 @@ L_curve25519_avx2_inv_6:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$49, 160(%rsp)
         leaq	96(%rsp), %rdi
         leaq	96(%rsp), %rsi
-L_curve25519_avx2_inv_7:
+        movq	$49, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_avx2_inv_7
         leaq	64(%rsp), %rdi
         leaq	96(%rsp), %rsi
         leaq	64(%rsp), %rdx
@@ -11548,17 +11937,14 @@ L_curve25519_avx2_inv_7:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$4, 160(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_curve25519_avx2_inv_8:
+        movq	$4, %rdx
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	160(%rsp)
-        jnz	L_curve25519_avx2_inv_8
         movq	%rsp, %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -11709,15 +12095,15 @@ L_curve25519_avx2_inv_8:
 .text
 .globl	fe_pow22523_avx2
 .type	fe_pow22523_avx2,@function
-.align	4
+.align	16
 fe_pow22523_avx2:
 #else
 .section	__TEXT,__text
 .globl	_fe_pow22523_avx2
-.p2align	2
+.p2align	4
 _fe_pow22523_avx2:
 #endif /* __APPLE__ */
-        subq	$0x78, %rsp
+        subq	$0x70, %rsp
         # pow22523
         movq	%rdi, 96(%rsp)
         movq	%rsi, 104(%rsp)
@@ -11780,17 +12166,14 @@ _fe_pow22523_avx2:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$4, 112(%rsp)
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
-L_fe_pow22523_avx2_1:
+        movb	$4, %dl
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	112(%rsp)
-        jnz	L_fe_pow22523_avx2_1
         movq	%rsp, %rdi
         leaq	32(%rsp), %rsi
         movq	%rsp, %rdx
@@ -11806,17 +12189,14 @@ L_fe_pow22523_avx2_1:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$9, 112(%rsp)
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
-L_fe_pow22523_avx2_2:
+        movb	$9, %dl
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	112(%rsp)
-        jnz	L_fe_pow22523_avx2_2
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
         movq	%rsp, %rdx
@@ -11832,17 +12212,14 @@ L_fe_pow22523_avx2_2:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$19, 112(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_fe_pow22523_avx2_3:
+        movb	$19, %dl
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	112(%rsp)
-        jnz	L_fe_pow22523_avx2_3
         leaq	32(%rsp), %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -11858,17 +12235,14 @@ L_fe_pow22523_avx2_3:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$9, 112(%rsp)
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
-L_fe_pow22523_avx2_4:
+        movb	$9, %dl
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	112(%rsp)
-        jnz	L_fe_pow22523_avx2_4
         movq	%rsp, %rdi
         leaq	32(%rsp), %rsi
         movq	%rsp, %rdx
@@ -11884,17 +12258,14 @@ L_fe_pow22523_avx2_4:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$49, 112(%rsp)
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
-L_fe_pow22523_avx2_5:
+        movb	$49, %dl
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	112(%rsp)
-        jnz	L_fe_pow22523_avx2_5
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
         movq	%rsp, %rdx
@@ -11910,17 +12281,14 @@ L_fe_pow22523_avx2_5:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$0x63, 112(%rsp)
         leaq	64(%rsp), %rdi
         leaq	64(%rsp), %rsi
-L_fe_pow22523_avx2_6:
+        movb	$0x63, %dl
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	112(%rsp)
-        jnz	L_fe_pow22523_avx2_6
         leaq	32(%rsp), %rdi
         leaq	64(%rsp), %rsi
         leaq	32(%rsp), %rdx
@@ -11936,17 +12304,14 @@ L_fe_pow22523_avx2_6:
 #else
         callq	_fe_sq_avx2
 #endif /* __APPLE__ */
-        movb	$49, 112(%rsp)
         leaq	32(%rsp), %rdi
         leaq	32(%rsp), %rsi
-L_fe_pow22523_avx2_7:
+        movb	$49, %dl
 #ifndef __APPLE__
-        callq	fe_sq_avx2@plt
+        callq	fe_sq_n_avx2@plt
 #else
-        callq	_fe_sq_avx2
+        callq	_fe_sq_n_avx2
 #endif /* __APPLE__ */
-        decb	112(%rsp)
-        jnz	L_fe_pow22523_avx2_7
         movq	%rsp, %rdi
         leaq	32(%rsp), %rsi
         movq	%rsp, %rdx
@@ -11979,18 +12344,18 @@ L_fe_pow22523_avx2_7:
 #endif /* __APPLE__ */
         movq	104(%rsp), %rsi
         movq	96(%rsp), %rdi
-        addq	$0x78, %rsp
+        addq	$0x70, %rsp
         repz retq
 #ifndef __APPLE__
 .text
 .globl	fe_ge_to_p2_avx2
 .type	fe_ge_to_p2_avx2,@function
-.align	4
+.align	16
 fe_ge_to_p2_avx2:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_to_p2_avx2
-.p2align	2
+.p2align	4
 _fe_ge_to_p2_avx2:
 #endif /* __APPLE__ */
         pushq	%rbx
@@ -12400,12 +12765,12 @@ _fe_ge_to_p2_avx2:
 .text
 .globl	fe_ge_to_p3_avx2
 .type	fe_ge_to_p3_avx2,@function
-.align	4
+.align	16
 fe_ge_to_p3_avx2:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_to_p3_avx2
-.p2align	2
+.p2align	4
 _fe_ge_to_p3_avx2:
 #endif /* __APPLE__ */
         pushq	%rbx
@@ -12943,12 +13308,12 @@ _fe_ge_to_p3_avx2:
 .text
 .globl	fe_ge_dbl_avx2
 .type	fe_ge_dbl_avx2,@function
-.align	4
+.align	16
 fe_ge_dbl_avx2:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_dbl_avx2
-.p2align	2
+.p2align	4
 _fe_ge_dbl_avx2:
 #endif /* __APPLE__ */
         pushq	%rbp
@@ -13529,12 +13894,12 @@ _fe_ge_dbl_avx2:
 .text
 .globl	fe_ge_madd_avx2
 .type	fe_ge_madd_avx2,@function
-.align	4
+.align	16
 fe_ge_madd_avx2:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_madd_avx2
-.p2align	2
+.p2align	4
 _fe_ge_madd_avx2:
 #endif /* __APPLE__ */
         pushq	%rbp
@@ -14128,12 +14493,12 @@ _fe_ge_madd_avx2:
 .text
 .globl	fe_ge_msub_avx2
 .type	fe_ge_msub_avx2,@function
-.align	4
+.align	16
 fe_ge_msub_avx2:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_msub_avx2
-.p2align	2
+.p2align	4
 _fe_ge_msub_avx2:
 #endif /* __APPLE__ */
         pushq	%rbp
@@ -14726,12 +15091,12 @@ _fe_ge_msub_avx2:
 .text
 .globl	fe_ge_add_avx2
 .type	fe_ge_add_avx2,@function
-.align	4
+.align	16
 fe_ge_add_avx2:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_add_avx2
-.p2align	2
+.p2align	4
 _fe_ge_add_avx2:
 #endif /* __APPLE__ */
         pushq	%rbx
@@ -15452,12 +15817,12 @@ _fe_ge_add_avx2:
 .text
 .globl	fe_ge_sub_avx2
 .type	fe_ge_sub_avx2,@function
-.align	4
+.align	16
 fe_ge_sub_avx2:
 #else
 .section	__TEXT,__text
 .globl	_fe_ge_sub_avx2
-.p2align	2
+.p2align	4
 _fe_ge_sub_avx2:
 #endif /* __APPLE__ */
         pushq	%rbx
@@ -16175,3 +16540,7 @@ _fe_ge_sub_avx2:
 .size	fe_ge_sub_avx2,.-fe_ge_sub_avx2
 #endif /* __APPLE__ */
 #endif /* HAVE_INTEL_AVX2 */
+
+#if defined(__linux__) && defined(__ELF__)
+.section	.note.GNU-stack,"",%progbits
+#endif

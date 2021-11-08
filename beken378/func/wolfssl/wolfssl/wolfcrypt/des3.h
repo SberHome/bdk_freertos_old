@@ -1,6 +1,6 @@
 /* des3.h
  *
- * Copyright (C) 2006-2019 wolfSSL Inc.
+ * Copyright (C) 2006-2021 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -30,15 +30,15 @@
 
 #ifndef NO_DES3
 
-#if defined(HAVE_FIPS) && \
-    defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 2)
+#if defined(HAVE_FIPS) && defined(HAVE_FIPS_VERSION) && \
+        (HAVE_FIPS_VERSION == 2 || HAVE_FIPS_VERSION == 3)
     #include <wolfssl/wolfcrypt/fips.h>
 #endif /* HAVE_FIPS_VERSION >= 2 */
 
 #if defined(HAVE_FIPS) && \
-	(!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
-/* included for fips @wc_fips */
-#include <cyassl/ctaocrypt/des3.h>
+        (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
+    /* included for fips @wc_fips */
+    #include <cyassl/ctaocrypt/des3.h>
 #endif
 
 #ifdef __cplusplus
@@ -54,8 +54,8 @@ enum {
 
 
 /* avoid redefinition of structs */
-#if !defined(HAVE_FIPS) || \
-    (defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 2))
+#if !defined(HAVE_FIPS) || (defined(HAVE_FIPS_VERSION) && \
+        (HAVE_FIPS_VERSION == 2 || HAVE_FIPS_VERSION == 3))
 
 #ifdef WOLFSSL_ASYNC_CRYPT
     #include <wolfssl/wolfcrypt/async.h>
@@ -95,22 +95,29 @@ typedef struct Des {
 
 
 /* DES3 encryption and decryption */
-typedef struct Des3 {
+struct Des3 {
     word32 key[3][DES_KS_SIZE];
     word32 reg[DES_BLOCK_SIZE / sizeof(word32)];      /* for CBC mode */
     word32 tmp[DES_BLOCK_SIZE / sizeof(word32)];      /* same         */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    const byte* key_raw;
-    const byte* iv_raw;
     WC_ASYNC_DEV asyncDev;
+#endif
+#if defined(WOLF_CRYPTO_CB) || \
+    (defined(WOLFSSL_ASYNC_CRYPT) && defined(WC_ASYNC_ENABLE_3DES))
+    word32 devKey[DES3_KEYLEN/sizeof(word32)]; /* raw key */
 #endif
 #ifdef WOLF_CRYPTO_CB
     int    devId;
     void*  devCtx;
 #endif
     void* heap;
-} Des3;
-#endif /* HAVE_FIPS */
+};
+
+#ifndef WC_DES3_TYPE_DEFINED
+    typedef struct Des3 Des3;
+    #define WC_DES3_TYPE_DEFINED
+#endif
+#endif /* HAVE_FIPS && HAVE_FIPS_VERSION >= 2 */
 
 
 WOLFSSL_API int  wc_Des_SetKey(Des* des, const byte* key,
