@@ -45,7 +45,7 @@ extern UINT32 ddev_close(DD_HANDLE handle);
 extern UINT32 ddev_read(DD_HANDLE handle, char *user_buf , UINT32 count, UINT32 op_flag);
 extern UINT32 ddev_write(DD_HANDLE handle, char *user_buf , UINT32 count, UINT32 op_flag);
 extern UINT32 ddev_control(DD_HANDLE handle, UINT32 cmd, VOID *param);
-extern UINT32 sddev_control(char *dev_name, UINT32 cmd, VOID *param);
+extern UINT32 sddev_control(const char *dev_name, UINT32 cmd, VOID *param);
 extern UINT32 ddev_register_dev(char *dev_name, DD_OPERATIONS *optr);
 extern UINT32 sddev_register_dev(char *dev_name, SDD_OPERATIONS *optr);
 extern UINT32 ddev_unregister_dev(char *dev_name);
