@@ -253,7 +253,7 @@ UINT32 ddev_control(DD_HANDLE handle, UINT32 cmd, VOID *param)
     return status;
 }
 
-UINT32 sddev_control(char *dev_name, UINT32 cmd, VOID *param)
+UINT32 sddev_control(const char *dev_name, UINT32 cmd, VOID *param)
 {
     UINT32 i;
     UINT32 status;
