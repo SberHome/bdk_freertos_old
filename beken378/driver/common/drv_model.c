@@ -81,7 +81,7 @@ UINT32 ddev_get_id_from_handle(DD_HANDLE handle)
     return id;
 }
 
-DD_HANDLE ddev_open(char *dev_name, UINT32 *status, UINT32 op_flag)
+DD_HANDLE ddev_open(const char *dev_name, UINT32 *status, UINT32 op_flag)
 {
     UINT32 i;
     UINT32 handle;

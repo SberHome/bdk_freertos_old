@@ -40,7 +40,7 @@ typedef enum _DD_OPEN_METHOD_
 *******************************************************************************/
 extern UINT32 drv_model_init(void);
 extern UINT32 drv_model_uninit(void);
-extern DD_HANDLE ddev_open(char *dev_name, UINT32 *status, UINT32 op_flag);
+extern DD_HANDLE ddev_open(const char *dev_name, UINT32 *status, UINT32 op_flag);
 extern UINT32 ddev_close(DD_HANDLE handle);
 extern UINT32 ddev_read(DD_HANDLE handle, char *user_buf , UINT32 count, UINT32 op_flag);
 extern UINT32 ddev_write(DD_HANDLE handle, char *user_buf , UINT32 count, UINT32 op_flag);
