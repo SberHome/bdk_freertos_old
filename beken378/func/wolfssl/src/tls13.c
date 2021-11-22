@@ -94,6 +94,9 @@
 #include <sys/time.h>
 #endif /* __MACH__ || __FreeBSD__ */
 
+#if defined(WOLFSSL_BEKEN)
+#include "lwip/sockets.h"
+#endif
 
 #include <wolfssl/internal.h>
 #include <wolfssl/error-ssl.h>
@@ -1499,13 +1502,6 @@ end:
      */
     word32 TimeNowInMilliseconds(void)
     {
-#warning "I added struct timeval as a temporary workaround"
-        struct timeval
-        {
-            time_t tv_sec;
-            suseconds_t tv_usec;
-        };
-
         struct timeval now;
 
         if (gettimeofday(&now, 0) < 0)
