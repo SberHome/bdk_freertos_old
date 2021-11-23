@@ -24,6 +24,9 @@
     #include <config.h>
 #endif
 
+#include "wolfmqtt/mqtt_client.h"
+#include "wolfmqtt/mqtt_socket.h"
+
 #ifdef WOLFMQTT_NONBLOCK
     /* need EWOULDBLOCK and EAGAIN */
     #ifdef MICROCHIP_MPLAB_HARMONY
@@ -31,9 +34,6 @@
     #endif
     #include <errno.h>
 #endif
-
-#include "wolfmqtt/mqtt_client.h"
-#include "wolfmqtt/mqtt_socket.h"
 
 /* Options */
 #ifdef WOLFMQTT_NO_STDIO
