@@ -69,6 +69,20 @@ void sntp_servermode_dhcp(int set_servers_from_dhcp);
 #define sntp_servermode_dhcp(x)
 #endif /* SNTP_GET_SERVERS_FROM_DHCP */
 
+/**
+ * @brief SNTP callback function for notifying about time sync event
+ *
+ * @param sec Time received from SNTP server.
+ */
+typedef void (*sntp_sync_time_cb_t) (u32_t sec);
+
+/**
+ * @brief Set a callback function for time synchronization notification
+ *
+ * @param callback a callback function
+ */
+void sntp_set_time_sync_notification_cb(sntp_sync_time_cb_t callback);
+
 #ifdef __cplusplus
 }
 #endif

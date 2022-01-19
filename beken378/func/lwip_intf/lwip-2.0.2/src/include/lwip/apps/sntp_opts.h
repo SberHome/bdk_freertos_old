@@ -50,7 +50,7 @@
  * if you need the additional precision.
  */
 #if !defined SNTP_SET_SYSTEM_TIME || defined __DOXYGEN__
-#define SNTP_SET_SYSTEM_TIME(sec)   LWIP_UNUSED_ARG(sec)
+#define SNTP_SET_SYSTEM_TIME(sec)   sntp_set_system_time(sec)
 #endif
 
 /** The maximum number of SNTP servers that can be set */
