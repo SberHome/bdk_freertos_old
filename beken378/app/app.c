@@ -788,7 +788,9 @@ void app_start(void)
     app_pre_start();
 
 #if (CFG_OS_FREERTOS)
+#if BEKEN_HAVE_CLI
     cli_init();
+#endif
 #endif
 
 #if CFG_UDISK_MP3

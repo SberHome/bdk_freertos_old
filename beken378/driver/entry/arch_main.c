@@ -47,7 +47,9 @@ static void extended_app_task_handler(void *arg)
     /* step 1: startup application layer*/
     if(get_ate_mode_state())
     {
+#if BEKEN_HAVE_ATE
 	    ate_start();
+#endif
     }
     else
     {
