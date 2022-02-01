@@ -63,6 +63,10 @@
 #include <string.h>
 #include <time.h>
 
+static void sntp_set_system_time(uint32_t sec);
+
+static sntp_sync_time_cb_t time_sync_notification_cb = NULL;
+
 #if LWIP_UDP
 
 /* Handle support for more than one server via SNTP_MAX_SERVERS */
@@ -723,5 +727,21 @@ sntp_getservername(u8_t idx)
   return NULL;
 }
 #endif /* SNTP_SERVER_DNS */
+
+static void sntp_set_system_time(u32_t sec)
+{
+  bk_printf("sntp_set_system_time: %u\r\n", sec);
+  if (time_sync_notification_cb) {
+    time_sync_notification_cb(sec);
+  }
+}
+
+/**
+ *  Set a callback function for time synchronization notification
+ */
+void sntp_set_time_sync_notification_cb(sntp_sync_time_cb_t callback)
+{
+    time_sync_notification_cb = callback;
+}
 
 #endif /* LWIP_UDP */
