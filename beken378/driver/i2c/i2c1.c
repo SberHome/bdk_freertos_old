@@ -206,6 +206,16 @@ static void i2c1_isr(void)
 
     i2c1_config &= (~I2C1_STA);
     i2c1_config &= (~I2C1_STO);
+/*
+SBERDEVICES: start of changes
+Added: implicit clearing of STA flag
+Reason: fix issue with spontaneous START condition during send operation on I2C1 interface
+Information was provided by Belon (maker of SDK) on Jan 4 2022
+*/    
+    REG_WRITE(REG_I2C1_CONFIG, i2c1_config);
+/*
+SBERDEVICES: end of changes
+*/    
     I2C1_PRT("1: gi2c1.AddrFlag=0x%x\r\n", gi2c1.AddrFlag);
     switch (work_mode)
     {
