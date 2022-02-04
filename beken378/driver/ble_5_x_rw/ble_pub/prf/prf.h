@@ -308,8 +308,8 @@ kernel_task_id_t prf_get_id_from_task(kernel_msg_id_t task);
  */
 kernel_task_id_t prf_get_task_from_id(kernel_msg_id_t id);
 
-struct prf_env_t * prf_env_get_from_uuid(uint8_t conidx,uint8_t uuid_len,const uint8_t *uuid);
-struct prf_env_t * prf_env_get_from_handle(uint8_t conidx,uint16_t handle);
+prf_env_t * prf_env_get_from_uuid(uint8_t conidx,uint8_t uuid_len,const uint8_t *uuid);
+prf_env_t * prf_env_get_from_handle(uint8_t conidx,uint16_t handle);
 #endif // (BLE_PROFILES)
 
 /// @} PRF
