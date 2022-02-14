@@ -67,6 +67,10 @@ static void sntp_set_system_time(uint32_t sec);
 
 static sntp_sync_time_cb_t time_sync_notification_cb = NULL;
 
+static void sntp_set_system_time_us(uint32_t sec, uint32_t us);
+
+static sntp_sync_time_us_cb_t time_sync_notification_us_cb = NULL;
+
 #if LWIP_UDP
 
 /* Handle support for more than one server via SNTP_MAX_SERVERS */
@@ -742,6 +746,22 @@ static void sntp_set_system_time(u32_t sec)
 void sntp_set_time_sync_notification_cb(sntp_sync_time_cb_t callback)
 {
     time_sync_notification_cb = callback;
+}
+
+static void sntp_set_system_time_us(u32_t sec, u32_t us)
+{
+  bk_printf("time in s = %u, us = %u\r\n", sec, us);
+  if (time_sync_notification_us_cb) {
+    time_sync_notification_us_cb(sec, us);
+  }
+}
+
+/**
+ *  Set a callback function for time synchronization notification in us
+ */
+void sntp_set_time_sync_notification_us_cb(sntp_sync_time_us_cb_t callback)
+{
+    time_sync_notification_us_cb = callback;
 }
 
 #endif /* LWIP_UDP */

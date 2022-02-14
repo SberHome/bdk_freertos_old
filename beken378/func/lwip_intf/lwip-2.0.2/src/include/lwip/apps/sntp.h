@@ -83,6 +83,22 @@ typedef void (*sntp_sync_time_cb_t) (u32_t sec);
  */
 void sntp_set_time_sync_notification_cb(sntp_sync_time_cb_t callback);
 
+/**
+ * @brief SNTP callback function for notifying about time sync event with us
+ *
+ * @param sec Time received from SNTP server.
+ * @param us Time received from SNTP server in us.
+ */
+typedef void (*sntp_sync_time_us_cb_t) (u32_t sec, u32_t us);
+
+/**
+ * @brief Set a callback function for time synchronization notification
+ *
+ * @param callback a callback function
+ */
+void sntp_set_time_sync_notification_us_cb(sntp_sync_time_us_cb_t callback);
+
+
 #ifdef __cplusplus
 }
 #endif
