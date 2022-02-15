@@ -53,6 +53,13 @@
 #define SNTP_SET_SYSTEM_TIME(sec)   sntp_set_system_time(sec)
 #endif
 
+/** SNTP macro to change system time in microseconds
+ * Сomment this out if you want to get data in seconds 
+ */
+#if !defined SNTP_SET_SYSTEM_TIME_US || defined __DOXYGEN__
+#define SNTP_SET_SYSTEM_TIME_US(sec, us)   sntp_set_system_time_us(sec, us)
+#endif
+
 /** The maximum number of SNTP servers that can be set */
 #if !defined SNTP_MAX_SERVERS || defined __DOXYGEN__
 #define SNTP_MAX_SERVERS           LWIP_DHCP_MAX_NTP_SERVERS
