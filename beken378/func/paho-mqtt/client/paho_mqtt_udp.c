@@ -859,6 +859,8 @@ _mqtt_disconnect_exit:
 _mqtt_exit:
     debug_printf("thread exit\n");
 
+    rtos_delete_thread(NULL);
+
     return;
 }
 
