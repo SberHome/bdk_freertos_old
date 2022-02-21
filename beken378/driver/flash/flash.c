@@ -613,7 +613,7 @@ void flash_protection_op(UINT8 mode, PROTECT_TYPE type)
 /*
 */
 #if (CFG_SOC_NAME == SOC_BL2028N)
-void flash_read_unique_id(void)
+void flash_read_unique_id_fail(void)
 {
     UINT32 value, reg_sctrl, reg_clk_pwd;
     uint8_t i;
@@ -621,6 +621,10 @@ void flash_read_unique_id(void)
 
     GLOBAL_INT_DECLARATION();
     GLOBAL_INT_DISABLE();
+
+//    *(uint32_t*)&flash_unique_id.bytes[0] = REG_READ(SPI_CTRL);
+//    *(uint32_t*)&flash_unique_id.bytes[4] = REG_READ(SPI_CONFIG);
+//    *(uint32_t*)&flash_unique_id.bytes[8] = REG_READ(SPI_STAT);
 
 	reg_clk_pwd = REG_READ(ICU_PERI_CLK_PWD);
 	REG_WRITE(ICU_PERI_CLK_PWD, reg_clk_pwd & ~PWD_SPI_CLK);
@@ -630,8 +634,11 @@ void flash_read_unique_id(void)
 
 	value = REG_READ(SPI_CONFIG);
 	value &= ~(0xFFF << SPI_TX_TRAHS_LEN_POSI);
-    value &= ~(0xFFF << SPI_RX_TRAHS_LEN_POSI);
 	value |= ((17 & 0xFFF) << SPI_TX_TRAHS_LEN_POSI);
+    REG_WRITE(SPI_CONFIG, value);
+
+	value = REG_READ(SPI_CONFIG);
+    value &= ~(0xFFF << SPI_RX_TRAHS_LEN_POSI);
 	value |= ((17 & 0xFFF) << SPI_RX_TRAHS_LEN_POSI);
     REG_WRITE(SPI_CONFIG, value);
 
@@ -639,19 +646,18 @@ void flash_read_unique_id(void)
 	value &= ~CTRL_NSSMD_3;
 	REG_WRITE(SPI_CTRL, value);
 
-	value = REG_READ(SPI_STAT);
-	while (0 == (value & TXFIFO_WR_READ))
-    {
-        value = REG_READ(SPI_STAT);
-	}
-
     for (i = 0; i < 17; i++)
     {
+       	value = REG_READ(SPI_STAT);
+	    while (0 == (value & TXFIFO_WR_READ))
+        {
+            value = REG_READ(SPI_STAT);
+	    }
         REG_WRITE(SPI_DAT, flash_uid_command[i]);
     }
     
 	value = REG_READ(SPI_CONFIG);
-	value |= ( SPI_TX_EN | SPI_RX_EN);
+	value |= (SPI_TX_EN | SPI_RX_EN);
 	REG_WRITE(SPI_CONFIG, value);
 
 	value = REG_READ(SPI_STAT);
@@ -697,12 +703,12 @@ void flash_init(void)
     flash_get_current_flash_config();
 
     #if (CFG_SOC_NAME == SOC_BL2028N)
-    if (id == 0x1C7015)
-    {
-        flash_read_unique_id();
-    }
+//    if (id == 0x1C7015)
+//    {
+//        flash_read_unique_id();
+//    }
     #endif
-	
+
 	set_flash_protect(FLASH_UNPROTECT_LAST_BLOCK);
 
 	#if (0 == CFG_JTAG_ENABLE)
@@ -880,7 +886,7 @@ UINT32 flash_ctrl(UINT32 cmd, void *parm)
 }
 
 #if (CFG_SOC_NAME == SOC_BL2028N)
-UINT32 flash_96bit_unique_id(UINT8** pointer)
+UINT32 flash_get_96bit_unique_id(UINT8** pointer)
 {
     if (flash_unique_id.type != FLASH_UNIQUE_ID_96BIT)
     {
