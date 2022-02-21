@@ -613,18 +613,14 @@ void flash_protection_op(UINT8 mode, PROTECT_TYPE type)
 /*
 */
 #if (CFG_SOC_NAME == SOC_BL2028N)
-void flash_read_unique_id_fail(void)
+void flash_read_unique_id(void)
 {
     UINT32 value, reg_sctrl, reg_clk_pwd;
     uint8_t i;
-    static const uint8_t flash_uid_command[17] = {0x5a, 0x0, 0x0, 0x80, 0x0};
+    static volatile uint8_t flash_uid_command[17] = {0x5a, 0x0, 0x0, 0x80, 0x0};
 
     GLOBAL_INT_DECLARATION();
     GLOBAL_INT_DISABLE();
-
-//    *(uint32_t*)&flash_unique_id.bytes[0] = REG_READ(SPI_CTRL);
-//    *(uint32_t*)&flash_unique_id.bytes[4] = REG_READ(SPI_CONFIG);
-//    *(uint32_t*)&flash_unique_id.bytes[8] = REG_READ(SPI_STAT);
 
 	reg_clk_pwd = REG_READ(ICU_PERI_CLK_PWD);
 	REG_WRITE(ICU_PERI_CLK_PWD, reg_clk_pwd & ~PWD_SPI_CLK);
@@ -648,11 +644,7 @@ void flash_read_unique_id_fail(void)
 
     for (i = 0; i < 17; i++)
     {
-       	value = REG_READ(SPI_STAT);
-	    while (0 == (value & TXFIFO_WR_READ))
-        {
-            value = REG_READ(SPI_STAT);
-	    }
+	    while (0 == (REG_READ(SPI_STAT) & TXFIFO_WR_READ));
         REG_WRITE(SPI_DAT, flash_uid_command[i]);
     }
     
@@ -660,19 +652,15 @@ void flash_read_unique_id_fail(void)
 	value |= (SPI_TX_EN | SPI_RX_EN);
 	REG_WRITE(SPI_CONFIG, value);
 
-	value = REG_READ(SPI_STAT);
-	while (0 == (value & RXFIFO_RD_READ))
-    {
-        value = REG_READ(SPI_STAT);
-	}
-
     for (i = 0; i < 5; i++)
     {
+        while (0 == (REG_READ(SPI_STAT) & RXFIFO_RD_READ));
         REG_READ(SPI_DAT);
     }
     
     for (i = 0; i < 12; i++)
     {
+        while (0 == (REG_READ(SPI_STAT) & RXFIFO_RD_READ));
         flash_unique_id.bytes[i] = REG_READ(SPI_DAT);
     }
 
@@ -703,10 +691,10 @@ void flash_init(void)
     flash_get_current_flash_config();
 
     #if (CFG_SOC_NAME == SOC_BL2028N)
-//    if (id == 0x1C7015)
-//    {
-//        flash_read_unique_id();
-//    }
+    if (id == 0x1C7015)
+    {
+        flash_read_unique_id();
+    }
     #endif
 
 	set_flash_protect(FLASH_UNPROTECT_LAST_BLOCK);
