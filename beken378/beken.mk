@@ -28,6 +28,7 @@ $(NAME)_INCLUDES := app/standalone-ap \
 					driver/jpeg \
 					driver/calendar \
 					driver/pwm \
+					driver/spi \
 					func/sdio_intf \
 					func/power_save \
 					func/temp_detect \
