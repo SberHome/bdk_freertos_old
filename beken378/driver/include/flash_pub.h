@@ -63,8 +63,10 @@ extern UINT8 flash_get_line_mode(void);
 extern void flash_set_line_mode(UINT8);
 extern UINT32 flash_read(char *user_buf, UINT32 count, UINT32 address);
 extern UINT32 flash_write(char *user_buf, UINT32 count, UINT32 address);
+#if CFG_UNIQUE_FLASH_ID
 #if (CFG_SOC_NAME == SOC_BL2028N)
 extern UINT32 flash_get_96bit_unique_id(UINT8** pointer);
+#endif
 #endif
 #endif //_FLASH_PUB_H
 
