@@ -715,6 +715,12 @@ _mqtt_start:
     c->tick_ping = fclk_get_tick();
     while (1)
     {
+
+        if (c->disconnect_cmd)
+        {
+            c->disconnect_cmd = false;
+            goto _mqtt_disconnect_exit;
+        }
         int res;
         uint32_t tick_now;
         fd_set readset;
@@ -847,6 +853,12 @@ _mqtt_restart:
         c->offline_callback(c);
     }
 
+    if (c->disconnect_cmd)
+    {
+        c->disconnect_cmd = false;
+        goto _mqtt_disconnect_exit;
+    }
+
     net_disconnect(c);
     rtos_delay_milliseconds(TICK_PER_SECOND * 5);
     debug_printf("restart!\n");
@@ -858,6 +870,7 @@ _mqtt_disconnect_exit:
 
 _mqtt_exit:
     debug_printf("thread exit\n");
+    c->disconnect_cmd = false;
 
     rtos_delete_thread(NULL);
 
@@ -978,6 +991,12 @@ exit:
         os_free(data);
 
     return rc;
+}
+
+void paho_mqtt_disconnect(MQTT_CLIENT_T *c)
+{   
+    c->disconnect_cmd = true;
+    return;
 }
 
 // eof
