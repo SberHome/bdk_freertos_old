@@ -93,7 +93,7 @@ EfErrCode bk_get_buf_env(const char *key, const char *buf, int len)
 
     if(out_len)
     {
-        count = min(len, out_len);
+        count = MIN(len, out_len);
         ASSERT(len == out_len);
 
         os_memcpy((void*)buf, out_ptr, count);

@@ -514,7 +514,7 @@ void http_wr_to_flash(char *page, UINT32 len)
 	i = 0;
 	tmp = (UINT8 *)page;
 	while (i < len) {
-		w_l = min(len - i, HTTP_FLASH_WR_BUF_MAX - bk_http_ptr->wr_last_len);
+		w_l = MIN(len - i, HTTP_FLASH_WR_BUF_MAX - bk_http_ptr->wr_last_len);
 		os_memcpy(bk_http_ptr->wr_buf + bk_http_ptr->wr_last_len, tmp + i, w_l);
 		i += w_l;
 		bk_http_ptr->wr_last_len += w_l;
