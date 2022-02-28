@@ -345,7 +345,7 @@
  * TCP_LISTEN_BACKLOG==1: Handle backlog connections.
  */
 #define TCP_LISTEN_BACKLOG		        1
-#define LWIP_PROVIDE_ERRNO		        1 
+//#define LWIP_PROVIDE_ERRNO		        0 
 
 #include <errno.h>
 #define ERRNO				            1
