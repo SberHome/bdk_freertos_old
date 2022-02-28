@@ -30,7 +30,7 @@ uint32_t read_from_pingpong_buf(void *buf_user, const uint32_t count, uint32_t *
     }
     GLOBAL_INT_RESTORE();
 
-    len = min(count, buf->length - buf->offset);
+    len = MIN(count, buf->length - buf->offset);
 
 	os_memcpy(buf_user, buf->addr, len);
     ret += len;
@@ -73,7 +73,7 @@ uint32_t write_to_pingpong_buf(void *buf_user, const uint32_t count, const uint3
     GLOBAL_INT_RESTORE();
 
     /* use memset instead write operations for test */
-	len = min(BUF_LEN, count);
+	len = MIN(BUF_LEN, count);
 	os_memcpy(buf->addr, buf_user, len);
 	buf->actual = actual;
 
