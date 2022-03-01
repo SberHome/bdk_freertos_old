@@ -65,6 +65,14 @@
 #define LINE_MODE_TWO                        2
 #define LINE_MODE_FOUR                       4
 
+#if CFG_UNIQUE_FLASH_ID
+typedef enum
+{
+    FLASH_UNIQUE_ID_INVALID = 0,
+    FLASH_UNIQUE_ID_96BIT = 1
+} FLASH_UNIQUE_ID_TYPE;
+#endif
+
 typedef enum
 {
     FLASH_OPCODE_WREN    = 1,
@@ -105,6 +113,14 @@ typedef struct
     uint8_t  m_value;
     uint8_t  mode_sel;
 } flash_config_t;
+
+#if CFG_UNIQUE_FLASH_ID
+typedef struct
+{
+    FLASH_UNIQUE_ID_TYPE  type;
+    uint8_t               bytes[12];
+} flash_unique_id_t;
+#endif
 
 /*******************************************************************************
 * Function Declarations

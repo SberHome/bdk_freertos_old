@@ -11,6 +11,12 @@
 #include "mcu_ps_pub.h"
 #include "mem_pub.h"
 #include "ate_app.h"
+#if CFG_UNIQUE_FLASH_ID
+#if (CFG_SOC_NAME == SOC_BL2028N)
+#include "icu.h"
+#include "spi_bl2028n.h"
+#endif
+#endif
 
 static const flash_config_t flash_config[] =
 {
@@ -32,6 +38,7 @@ static const flash_config_t flash_config[] =
 
 static const flash_config_t *flash_current_config = NULL;
 static UINT32 flash_id;
+static flash_unique_id_t flash_unique_id = {FLASH_UNIQUE_ID_INVALID, {0}};
 static DD_OPERATIONS flash_op =
 {
     NULL,
@@ -607,16 +614,100 @@ void flash_protection_op(UINT8 mode, PROTECT_TYPE type)
 	set_flash_protect(type);
 }
 
+#if CFG_UNIQUE_FLASH_ID
+#if (CFG_SOC_NAME == SOC_BL2028N)
+/*
+  Read Unique ID Number from EN25QH16B flash - specific to BL2028N
+  This function must be executed from ITCM memory.
+  Code execution from flash is not allowed because of direct SPI interaction with flash memory.
+*/
+void flash_read_unique_id(void)
+{
+    UINT32 value, reg_sctrl, reg_clk_pwd;
+    uint8_t i;
+    static volatile uint8_t flash_uid_command[17] = {0x5a, 0x0, 0x0, 0x80, 0x0};
+
+    GLOBAL_INT_DECLARATION();
+    GLOBAL_INT_DISABLE();
+
+    reg_clk_pwd = REG_READ(ICU_PERI_CLK_PWD);
+    REG_WRITE(ICU_PERI_CLK_PWD, reg_clk_pwd & ~PWD_SPI_CLK);
+
+    reg_sctrl = REG_READ(SCTRL_CONTROL);
+    REG_WRITE(SCTRL_CONTROL, reg_sctrl | FLASH_SPI_MUX_BIT);
+
+    value = REG_READ(SPI_CONFIG);
+    value &= ~(0xFFF << SPI_TX_TRAHS_LEN_POSI);
+    value |= ((17 & 0xFFF) << SPI_TX_TRAHS_LEN_POSI);
+    REG_WRITE(SPI_CONFIG, value);
+
+    value = REG_READ(SPI_CONFIG);
+    value &= ~(0xFFF << SPI_RX_TRAHS_LEN_POSI);
+    value |= ((17 & 0xFFF) << SPI_RX_TRAHS_LEN_POSI);
+    REG_WRITE(SPI_CONFIG, value);
+
+    value = REG_READ(SPI_CTRL);
+    value &= ~CTRL_NSSMD_3;
+    REG_WRITE(SPI_CTRL, value);
+
+    for (i = 0; i < 17; i++)
+    {
+        while (0 == (REG_READ(SPI_STAT) & TXFIFO_WR_READ));
+        REG_WRITE(SPI_DAT, flash_uid_command[i]);
+    }
+
+    value = REG_READ(SPI_CONFIG);
+    value |= (SPI_TX_EN | SPI_RX_EN);
+    REG_WRITE(SPI_CONFIG, value);
+
+    for (i = 0; i < 5; i++)
+    {
+        while (0 == (REG_READ(SPI_STAT) & RXFIFO_RD_READ));
+        REG_READ(SPI_DAT);
+    }
+
+    for (i = 0; i < 12; i++)
+    {
+        while (0 == (REG_READ(SPI_STAT) & RXFIFO_RD_READ));
+        flash_unique_id.bytes[i] = REG_READ(SPI_DAT);
+    }
+
+    value = REG_READ(SPI_CONFIG);
+    value &= ~(SPI_TX_EN | SPI_RX_EN);
+    REG_WRITE(SPI_CONFIG, value);
+
+    value = REG_READ(SPI_CTRL);
+    value |= CTRL_NSSMD_3;
+    REG_WRITE(SPI_CTRL, value);
+
+    REG_WRITE(SCTRL_CONTROL, reg_sctrl);
+    REG_WRITE(ICU_PERI_CLK_PWD, reg_clk_pwd);
+
+    flash_unique_id.type = FLASH_UNIQUE_ID_96BIT;
+    GLOBAL_INT_RESTORE();
+}
+#endif
+#endif
+
 void flash_init(void)
 {
     UINT32 id;
 
     while(REG_READ(REG_FLASH_OPERATE_SW) & BUSY_SW);
-	
+
     id = flash_get_id();
     FLASH_PRT("[Flash]id:0x%x\r\n", id);
     flash_get_current_flash_config();
-	
+
+    #if CFG_UNIQUE_FLASH_ID
+    #if (CFG_SOC_NAME == SOC_BL2028N)
+    if (id == 0x1C7015)
+    {
+        flash_read_unique_id();
+    }
+    #endif
+    #endif
+
 	set_flash_protect(FLASH_UNPROTECT_LAST_BLOCK);
 
 	#if (0 == CFG_JTAG_ENABLE)
@@ -792,5 +883,29 @@ UINT32 flash_ctrl(UINT32 cmd, void *parm)
     peri_busy_count_dec();
     return ret;
 }
+
+#if CFG_UNIQUE_FLASH_ID
+#if (CFG_SOC_NAME == SOC_BL2028N)
+/*
+  Interface function to get pointer to 96-bit Unique ID Number of Flash
+*/
+UINT32 flash_get_96bit_unique_id(UINT8** pointer)
+{
+    if (flash_unique_id.type != FLASH_UNIQUE_ID_96BIT)
+    {
+        return FLASH_FAILURE;
+    }
+
+    if (NULL == pointer)
+    {
+        return FLASH_FAILURE;
+    }
+
+    *pointer = (UINT8*)&flash_unique_id.bytes;
+
+    return FLASH_SUCCESS;
+}
+#endif
+#endif
 // eof
 
