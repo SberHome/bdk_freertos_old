@@ -109,6 +109,8 @@ struct MQTT_CLIENT_S
 #endif
 	
 	void *user_data;                  /* user-specific data */
+
+    bool disconnect_cmd;
 };
 
 /* subscribe topic receive data callback */
@@ -138,6 +140,13 @@ int mqtt_publish(MQTT_CLIENT_T *client, const char *topic, MQTTMessage *message)
 int mqtt_publish_with_topic(MQTT_CLIENT_T *c, const char *topicName, MQTTMessage *message);
 
 int mqtt_cmd(MQTT_CLIENT_T *c, const char *cmd);
+
+/**
+ * This function stop mqtt worker thread and free mqtt client object.
+ *
+ * @param client the pointer of MQTT context structure
+ */
+void paho_mqtt_disconnect(MQTT_CLIENT_T *client);
 
 #ifdef PAHOMQTT_PIPE_MODE
 
