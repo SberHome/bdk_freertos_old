@@ -38,7 +38,9 @@ static const flash_config_t flash_config[] =
 
 static const flash_config_t *flash_current_config = NULL;
 static UINT32 flash_id;
+#if CFG_UNIQUE_FLASH_ID
 static flash_unique_id_t flash_unique_id = {FLASH_UNIQUE_ID_INVALID, {0}};
+#endif
 static DD_OPERATIONS flash_op =
 {
     NULL,
