@@ -142,7 +142,7 @@ OSStatus bk_flash_erase(bk_partition_t inPartition, uint32_t off_set, uint32_t s
  * @return  kNoErr        : On success.
  * @return  kGeneralErr   : If an error occurred with any step
  */
-OSStatus bk_flash_write( bk_partition_t inPartition, volatile uint32_t off_set, uint8_t *inBuffer , uint32_t inBufferLength);
+OSStatus bk_flash_write( bk_partition_t inPartition, uint32_t off_set, uint8_t *inBuffer , uint32_t inBufferLength);
 
 /**@brief    Read data from an area on a Flash to data buffer in RAM
  *
@@ -154,7 +154,7 @@ OSStatus bk_flash_write( bk_partition_t inPartition, volatile uint32_t off_set, 
  * @return    kNoErr        : On success.
  * @return    kGeneralErr   : If an error occurred with any step
  */
-OSStatus bk_flash_read( bk_partition_t inPartition, volatile uint32_t off_set, uint8_t *outBuffer, uint32_t inBufferLength);
+OSStatus bk_flash_read( bk_partition_t inPartition, uint32_t off_set, uint8_t *outBuffer, uint32_t inBufferLength);
 
 
 
