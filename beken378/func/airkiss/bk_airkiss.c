@@ -3,7 +3,7 @@
 #include "airkiss.h"
 #include "mem_pub.h"
 #include "role_launch.h"
-#include "sockets.h"
+#include "lwip/sockets.h"
 
 static int bk_airkiss_decode_status;
 uint32_t airkiss_start_flag = 0;
