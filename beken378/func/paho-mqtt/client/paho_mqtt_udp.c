@@ -4,7 +4,7 @@
 #include "MQTTPacket.h"
 #include "paho_mqtt.h"
 #include <lwip/netdb.h>
-#include "lwip/sockets.h"
+#include "sockets.h"
 #include <arch/sys_arch.h>
 #include <lwip/sys.h>
 #include <lwip/netifapi.h>

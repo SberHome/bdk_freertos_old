@@ -346,8 +346,7 @@
  */
 #define TCP_LISTEN_BACKLOG		        1
 //#define LWIP_PROVIDE_ERRNO		        0 
-
-#include <errno.h>
+#include <sys/errno.h>
 #define ERRNO				            1
 
 //#define LWIP_SNMP 1
