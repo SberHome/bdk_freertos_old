@@ -1,6 +1,7 @@
 #include "sl_tls.h"
 
 #include "lwip/sockets.h"
+#include <string.h>
 #include "lwip/ip_addr.h"
 #include "lwip/inet.h"
 
@@ -58,25 +59,26 @@ MbedTLSSession * ssl_create(char *url,char *port)
 	int ret;
 	MbedTLSSession *tls_session = NULL;
 
-	if(!url && !port)
-		return NULL;
+	if(!url && !port) {
+		goto exit;
+	}
 	
 	bk_printf("[SSL]ssl create session,url:%s,port:%s\r\n",url,port);
 	tls_session = sl_ssl_handle_create();
 	if(tls_session == NULL)
 	{
 		bk_printf("[SSL]%s %d error\r\n",__FUNCTION__,__LINE__);
-		return -1;
+		goto exit;
 	}
 
-	tls_session->host = os_strdup(url);  ///os_strdup(DEFAULT_MBEDTLS_WEB_SERVER);
+	tls_session->host = strdup(url);  ///os_strdup(DEFAULT_MBEDTLS_WEB_SERVER);
 	if(tls_session->host == NULL) 
 	{
 		bk_printf("no memory for tls_session->host malloc\n");
 		goto err_exit;
 	}
 	
-    tls_session->port = os_strdup(port);///os_strdup(DEFAULT_MBEDTLS_WEB_PORT);
+    tls_session->port = strdup(port);///os_strdup(DEFAULT_MBEDTLS_WEB_PORT);
 	if(tls_session->port == NULL)
 	{
 		bk_printf("no memory for tls_session->port malloc\n");
@@ -94,10 +96,10 @@ MbedTLSSession * ssl_create(char *url,char *port)
 	if(sl_ssl_connect_create(tls_session) != 0)
 	{
 		tls_session = NULL;
-		goto error;
 	}
 	
-	return tls_session;
+	goto exit;
+
 err_exit:
 	if((tls_session)&&(tls_session->host != NULL)) {
 		tls_free(tls_session->host);
@@ -115,10 +117,9 @@ err_exit:
 		tls_free(tls_session);
 		tls_session = NULL;
 	}
-	goto error;
-	return 0;
-error:
-	return 0;
+
+exit:
+	return tls_session;
 }
 
 int ssl_txdat_sender(MbedTLSSession *tls_session,int len,char *data)

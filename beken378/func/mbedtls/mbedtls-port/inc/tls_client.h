@@ -27,8 +27,8 @@
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/certs.h"
 
-#define CFG_USE_CA_CERTIFICATE                 0
-#define CFG_USE_CA_CERTIFICATE_VERIFY          0
+#define CFG_USE_CA_CERTIFICATE                 1
+#define CFG_USE_CA_CERTIFICATE_VERIFY          1
 
 #define USE_CA_CERTIFICATE_EN                  ((CFG_USE_CA_CERTIFICATE) || (CFG_USE_CA_CERTIFICATE_VERIFY))
 

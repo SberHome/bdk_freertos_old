@@ -347,7 +347,7 @@ int mbedtls_net_accept( mbedtls_net_context *bind_ctx,
 
     /* Is this a TCP or UDP socket? */
     if( getsockopt( bind_ctx->fd, SOL_SOCKET, SO_TYPE,
-                    (void *) &type, &type_len ) != 0 ||
+                    (void *) &type, (socklen_t *) &type_len ) != 0 ||
         ( type != SOCK_STREAM && type != SOCK_DGRAM ) )
     {
         return( MBEDTLS_ERR_NET_ACCEPT_FAILED );
@@ -357,7 +357,7 @@ int mbedtls_net_accept( mbedtls_net_context *bind_ctx,
     {
         /* TCP: actual accept() */
         ret = client_ctx->fd = (int) accept( bind_ctx->fd,
-                                         (struct sockaddr *) &client_addr, &n );
+                                         (struct sockaddr *) &client_addr, (socklen_t *) &n );
     }
     else
     {
@@ -365,7 +365,7 @@ int mbedtls_net_accept( mbedtls_net_context *bind_ctx,
         char buf[1] = { 0 };
 
         ret = (int) recvfrom( bind_ctx->fd, buf, sizeof( buf ), MSG_PEEK,
-                        (struct sockaddr *) &client_addr, &n );
+                        (struct sockaddr *) &client_addr, (socklen_t *) &n );
 
 #if defined(_WIN32)
         if( ret == SOCKET_ERROR &&
@@ -406,7 +406,7 @@ int mbedtls_net_accept( mbedtls_net_context *bind_ctx,
 //                         (struct sockaddr *) &local_addr, &n ) != 0 ||
 //            ( bind_ctx->fd = (int) socket( local_addr.ss_family,
         if( getsockname( client_ctx->fd,
-                         (struct sockaddr *) &local_addr, &n ) != 0 ||
+                         (struct sockaddr *) &local_addr, (socklen_t *) &n ) != 0 ||
             ( bind_ctx->fd = (int) socket( local_addr.sin_family,
                                            SOCK_DGRAM, IPPROTO_UDP ) ) < 0 ||
             setsockopt( bind_ctx->fd, SOL_SOCKET, SO_REUSEADDR,

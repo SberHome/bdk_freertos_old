@@ -90,7 +90,7 @@ unsigned long mbedtls_timing_get_timer( struct mbedtls_timing_hr_time *val, int 
 static void sighandler( int signum )
 {
     mbedtls_timing_alarmed = 1;
-    signal( signum, sighandler );
+    bk_signal( signum, sighandler );
 }
 
 unsigned int alarm(unsigned int seconds)
@@ -101,7 +101,7 @@ unsigned int alarm(unsigned int seconds)
 void mbedtls_set_alarm( int seconds )
 {
     mbedtls_timing_alarmed = 0;
-    signal( SIGALRM, sighandler );
+    bk_signal( SIGALRM, sighandler );
     alarm( seconds );
 }
 
