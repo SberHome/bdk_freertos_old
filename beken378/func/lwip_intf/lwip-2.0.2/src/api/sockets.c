@@ -1851,8 +1851,15 @@ lwip_shutdown(int s, int how)
   if (!sock) {
     return -1;
   }
-  SOCK_DEINIT_SYNC(sock);
-
+/*
+SBERDEVICES: start of changes
+Removed: SOCK_DEINIT_SYNC macro at socket shutdown
+Reason: fix issue with memory leaks if socket close() is called after shutdown()
+*/    
+//  SOCK_DEINIT_SYNC(sock);
+/*
+SBERDEVICES: end of changes
+*/    
   if (sock->conn != NULL) {
     if (NETCONNTYPE_GROUP(netconn_type(sock->conn)) != NETCONN_TCP) {
       sock_set_errno(sock, EOPNOTSUPP);
