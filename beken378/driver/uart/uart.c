@@ -25,7 +25,11 @@
 #include "uart1_tcp_server_demo.h"
 #endif
 
-int uart_print_port = UART2_PORT;
+#ifndef UART_PRINT_PORT
+#define UART_PRINT_PORT	UART2_PORT
+#endif
+
+int uart_print_port = UART_PRINT_PORT;
 static struct uart_callback_des uart_receive_callback[2] = {{NULL}, {NULL}};
 static struct uart_callback_des uart_txfifo_needwr_callback[2] = {{NULL}, {NULL}};
 static struct uart_callback_des uart_tx_end_callback[2] = {{NULL}, {NULL}};
